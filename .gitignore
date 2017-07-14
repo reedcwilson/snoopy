@@ -1,0 +1,8 @@
+*.png
+*.pyc
+__pycache__/
+a.out
+close-*
+build/
+dist/
+snoopy.spec
