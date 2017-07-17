@@ -7,13 +7,21 @@
 const int DATA_SIZE = 512;
 const char *PLIST = "com.reedcwilson.snoopy.plist";
 
+void debug(char *message) {
+  char filename[DATA_SIZE];
+  sprintf(filename, "%s/code/snoopy/launchd.out", getenv("HOME"));
+  FILE *f = fopen(filename, "a");
+  fprintf(f, "%s\n", message);
+  fclose(f);
+}
+
 int is_loaded() {
   FILE *fp; 
   char arr[DATA_SIZE];
   int status;
   fp = popen("launchctl list | grep com.reedcwilson.snoopy", "r");
   while (fgets(arr, DATA_SIZE, fp) != NULL) {
-    /*printf("%s", arr);*/
+    //printf("%s", arr);
   }
   return pclose(fp);
 }
