@@ -4,10 +4,11 @@ import getpass
 import subprocess
 import base64
 import shutil
-
+import sys
 import os
-directory = os.path.dirname(os.path.abspath(__file__))
-parentdir = os.path.dirname(directory)
+import re
+_directory = os.path.dirname(os.path.abspath(__file__))
+parentdir = os.path.dirname(_directory)
 os.sys.path.insert(0, parentdir)
 from lib.secrets_manager import SecretsManager
 
@@ -49,14 +50,58 @@ def load_plist(filename):
     subprocess.check_output(['launchctl', 'load', filename])
 
 
+def purge(directory, pattern):
+    for f in os.listdir(directory):
+        if re.search(pattern, f):
+            os.remove(os.path.join(directory, f))
+
+
+def ensure_clean_directory():
+    shutil.rmtree("./build", ignore_errors=True)
+    shutil.rmtree("./dist", ignore_errors=True)
+    shutil.rmtree("./__pycache__", ignore_errors=True)
+    purge(parentdir, "^ORIGINAL_.*")
+    purge(parentdir, ".*log$")
+    purge(parentdir, ".*out$")
+
+
+def extract_value(string):
+    return string.split(":")[1].strip()
+
+
+def load_inputs(filename):
+    config = {}
+    config_str = ""
+    with open(filename, 'r') as f:
+        config_str = f.read()
+    lines = config_str.split("\n")
+    for line in lines:
+        if line.startswith('user'):
+            config['user'] = extract_value(line)
+        elif line.startswith('pwd'):
+            config['pwd'] = extract_value(line)
+        elif line.startswith('recipient'):
+            config['recipient'] = extract_value(line)
+        elif line.startswith('device'):
+            config['device'] = extract_value(line)
+        elif line.startswith('token'):
+            config['token'] = extract_value(line)
+    return config
+
+
 def main():
-    # accept username, password, recipient, device, token
+    ensure_clean_directory()
     inputs = {}
-    inputs['user'] = input("gmail username: ")
-    inputs['pwd'] = getpass.getpass("gmail password: ")
-    inputs['to'] = input("recipient of emails: ")
-    inputs['device'] = input("name of device: ")
-    inputs['token'] = getpass.getpass("secure token: ")
+    # you can pass a mail.config filename to be faster
+    if len(sys.argv) > 1:
+        inputs = load_inputs(sys.argv[1])
+    else:
+        # accept username, password, recipient, device, token
+        inputs['user'] = input("gmail username: ")
+        inputs['pwd'] = getpass.getpass("gmail password: ")
+        inputs['recipient'] = input("recipient of emails: ")
+        inputs['device'] = input("name of device: ")
+        inputs['token'] = getpass.getpass("secure token: ")
 
     # create config
     config_str = ""
@@ -66,13 +111,15 @@ def main():
     # accept the secret encryption key
     secret_key = getpass.getpass("secret (should be different than token): ")
 
+    print("preparing files...")
+
     # encrypt the mail config
     secrets_manager = SecretsManager(secret_key, mail_config)
     secrets_manager.put(config_str)
 
     # embed secret key in copy of snoopy.py and replace installation directory
     encoded_secret = base64.b64encode(secret_key.encode()).decode()
-    tokens = {"SUPER_SECRET_KEY": encoded_secret, "HOME_DIRECTORY": directory}
+    tokens = {"SUPER_SECRET_KEY": encoded_secret, "HOME_DIRECTORY": parentdir}
     prepare_file(snoopy_filename, tokens)
 
     # replace tokens in snoopy.spec
@@ -82,15 +129,21 @@ def main():
     # install python dependencies
 
     # compile a.out
+    print("compiling launchd reloader...")
     subprocess.check_output(['gcc', 'darwin/create_launchd.c'])
 
     # compile snoopy.spec
+    print("compiling snoopy...")
     subprocess.check_output(['pyinstaller', 'snoopy.spec'])
 
     # replace the new snoopy.py and spec with the originals
-    shutil.copy('ORIGINAL_'.format(snoopy_filename), snoopy_filename)
-    shutil.copy('ORIGINAL_'.format(snoopy_spec_filename), snoopy_spec_filename)
-    subprocess.check_output(['rm', 'ORIGINAL_*'])
+    print("replacing originals...")
+    snoopy_original = 'ORIGINAL_{}'.format(snoopy_filename)
+    spec_original = 'ORIGINAL_{}'.format(snoopy_spec_filename)
+    shutil.copy(snoopy_original, snoopy_filename)
+    shutil.copy(spec_original, snoopy_spec_filename)
+    os.remove(snoopy_original)
+    os.remove(spec_original)
 
     local_config_file = '{}/{}'.format(
         config_dir,
@@ -98,8 +151,10 @@ def main():
     runtime_config_file = '{}/{}'.format(
         launchd_path,
         plist_filename)
+    print("starting daemon...")
     copy_plist(local_config_file, runtime_config_file, parentdir)
-    load_plist()
+    load_plist(runtime_config_file)
+    print("finished!")
 
 
 if __name__ == '__main__':
