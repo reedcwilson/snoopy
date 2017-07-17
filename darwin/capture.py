@@ -14,5 +14,7 @@ def get_num_monitors():
 def capture(directory):
     num = get_num_monitors()
     args = ['screencapture', '-x']
-    args.extend(['{}/{}.png'.format(directory, n) for n in range(num)])
+    filenames = ['{}/{}.png'.format(directory, n) for n in range(num)]
+    args.extend(filenames)
     subprocess.check_output(args)
+    return filenames
