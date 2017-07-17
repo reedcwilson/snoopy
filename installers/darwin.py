@@ -61,6 +61,7 @@ def ensure_clean_directory():
     shutil.rmtree("./dist", ignore_errors=True)
     shutil.rmtree("./__pycache__", ignore_errors=True)
     purge(parentdir, "^ORIGINAL_.*")
+    purge(parentdir, ".*png$")
     purge(parentdir, ".*log$")
     purge(parentdir, ".*out$")
 
