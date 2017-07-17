@@ -7,12 +7,12 @@
 	<key>Label</key>
 	<string>com.reedcwilson.snoopy</string>
 	<key>Program</key>
-  <string>/Users/reedcwilson/code/snoopy/dist/snoopy/snoopy</string>
+  <string>%INSTALL_DIR%/dist/snoopy/snoopy</string>
 	<key>RunAtLoad</key>
 	<true/>
   <key>StandardOutPath</key>
-  <string>/Users/reedcwilson/code/snoopy/out.log</string>
+  <string>%INSTALL_DIR%/out.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/reedcwilson/code/snoopy/err.log</string>
+  <string>%INSTALL_DIR%/err.log</string>
 </dict>
 </plist>

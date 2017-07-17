@@ -7,7 +7,6 @@ import time
 import signal
 import random
 import notifier
-import shutil
 import subprocess
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
@@ -49,18 +48,19 @@ def get_plist_filename(s=None):
 
 
 class GracefulKiller:
-    def __init__(self, reloader_filename):
+    def __init__(self, reloader_filename, notifier):
         signal.signal(signal.SIGHUP, self.exit_gracefully)
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         self.reloader = reloader_filename
+        self.notifier = notifier
 
     def exit(self):
         time.sleep(2)
         sys.exit(0)
 
     def exit_gracefully(self, signum, frame):
-        notifier.send(subject="Shutting down")
+        self.notifier.send(subject="Shutting down")
         pid = os.fork()
         if pid == 0:
             subprocess.call([self.reloader])
@@ -68,7 +68,11 @@ class GracefulKiller:
 
 
 class ConfigFileEventHandler(PatternMatchingEventHandler):
-    def __init__(self):
+    def __init__(self, notifier, install_dir, launchd_dir, plist_filename):
+        self.notifier = notifier
+        self.install_dir = install_dir
+        self.launchd_dir = launchd_dir
+        self.plist_filename = plist_filename
         PatternMatchingEventHandler.__init__(
             self,
             patterns=["*com.reedcwilson.snoopy.plist*"],
@@ -76,17 +80,19 @@ class ConfigFileEventHandler(PatternMatchingEventHandler):
 
     def on_any_event(self, event):
         message = "The config file has been tampered with: {}".format(event.src_path)
-        notifier.send(
+        self.notifier.send(
                 subject="Alert!",
                 message=message)
-        filename = get_plist_filename()
-        shutil.copy(
-            '{}/{}'.format(directory, filename),
-            '{}/{}'.format(launchd_path, filename))
+        config = ""
+        with open('{}/{}'.format(self.install_dir, self.plist_filename), 'r') as f:
+            config = f.read().replace("%INSTALL_DIR%", self.install_dir)
+        with open('{}/{}'.format(self.launchd_dir, self.plist_filename), 'w') as f:
+            f.write(config)
 
 
 class InstallationEventHandler(PatternMatchingEventHandler):
-    def __init__(self):
+    def __init__(self, notifier):
+        self.notifier = notifier
         PatternMatchingEventHandler.__init__(
             self,
             patterns=["*"],
@@ -94,7 +100,7 @@ class InstallationEventHandler(PatternMatchingEventHandler):
 
     def on_any_event(self, event):
         message = "The installation directory has been tampered with. file: {}".format(event.src_path)
-        notifier.send(
+        self.notifier.send(
                 subject="Alert!",
                 message=message)
 
@@ -102,13 +108,14 @@ class InstallationEventHandler(PatternMatchingEventHandler):
 class MyDaemon():
     killer = None
 
-    def __init__(self, killer):
-        self.killer = killer
+    def __init__(self):
+        self.killer = GracefulKiller(get_reloader())
+        notifier.send(subject="Starting up")
 
     def run(self):
         self.observer = Observer()
-        config_event_handler = ConfigFileEventHandler()
-        installation_event_handler = InstallationEventHandler()
+        config_event_handler = ConfigFileEventHandler(notifier, directory, launchd_path, get_plist_filename())
+        installation_event_handler = InstallationEventHandler(notifier)
         self.observer.schedule(config_event_handler, launchd_path, recursive=False)
         self.observer.schedule(installation_event_handler, installation_path, recursive=False)
         self.observer.start()
@@ -119,9 +126,7 @@ class MyDaemon():
 
 
 def main():
-    notifier.send(subject="Starting up")
-    killer = GracefulKiller(get_reloader())
-    daemon = MyDaemon(killer)
+    daemon = MyDaemon()
     daemon.run()
 
 
