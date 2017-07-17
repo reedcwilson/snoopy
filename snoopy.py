@@ -56,7 +56,7 @@ class GracefulKiller:
         self.notifier = notifier
 
     def exit(self):
-        time.sleep(2)
+        time.sleep(1)
         sys.exit(0)
 
     def exit_gracefully(self, signum, frame):

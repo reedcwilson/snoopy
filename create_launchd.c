@@ -33,7 +33,7 @@ void launch(char filename[]) {
 }
 
 int main(int argc, char **argv) {
-  sleep(2);
+  sleep(1);
   int loaded;
   char filename[DATA_SIZE];
   loaded = is_loaded();
