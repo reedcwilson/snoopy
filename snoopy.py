@@ -6,8 +6,8 @@ import os
 import time
 import signal
 import random
-from notifier import Notifier
-from secrets_manager import SecretsManager
+from lib.notifier import Notifier
+from lib.secrets_manager import SecretsManager
 import subprocess
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
@@ -17,6 +17,7 @@ from darwin import capture as catcher
 
 home              = os.getenv("HOME")
 directory         = '{}/code/snoopy'.format(home)
+config_dir        = '{}/config'.format(directory)
 installation_path = '{}/dist/snoopy'.format(directory)
 launchd_path      = '{}/Library/LaunchAgents'.format(home)
 secret_key        = 'SUPER_SECRET_KEY'
@@ -65,9 +66,9 @@ class GracefulKiller:
 
 
 class ConfigFileEventHandler(PatternMatchingEventHandler):
-    def __init__(self, notifier, install_dir, launchd_dir, plist_filename):
+    def __init__(self, notifier, config_dir, launchd_dir, plist_filename):
         self.notifier = notifier
-        self.install_dir = install_dir
+        self.config_dir = config_dir
         self.launchd_dir = launchd_dir
         self.plist_filename = plist_filename
         PatternMatchingEventHandler.__init__(
@@ -82,10 +83,10 @@ class ConfigFileEventHandler(PatternMatchingEventHandler):
             subject="Alert!",
             message=message)
         config = ""
-        install_file = '{}/{}'.format(self.install_dir, self.plist_filename)
+        config_file = '{}/{}'.format(self.config_dir, self.plist_filename)
         config_file = '{}/{}'.format(self.launchd_dir, self.plist_filename)
-        with open(install_file, 'r') as f:
-            config = f.read().replace("%INSTALL_DIR%", self.install_dir)
+        with open(config_file, 'r') as f:
+            config = f.read().replace("%config_DIR%", self.config_dir)
         with open(config_file, 'w') as f:
             f.write(config)
 
@@ -122,7 +123,7 @@ class MyDaemon():
         self.observer = Observer()
         config_event_handler = ConfigFileEventHandler(
             self.notifier,
-            directory,
+            config_dir,
             launchd_path,
             get_plist_filename())
         installation_event_handler = InstallationEventHandler(self.notifier)
