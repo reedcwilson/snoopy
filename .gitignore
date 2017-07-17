@@ -8,3 +8,4 @@ dist/
 *.out
 *.log
 mail.config
+mail.config.actual

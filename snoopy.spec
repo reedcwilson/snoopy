@@ -3,10 +3,15 @@
 block_cipher = None
 
 
+added_files = [
+  ('a.out','.'),
+  ('mail.config','.')
+]
+
 a = Analysis(['snoopy.py'],
              pathex=['/Users/reedcwilson/code/snoopy'],
              binaries=[],
-             datas=[],
+             datas=added_files,
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -14,7 +19,6 @@ a = Analysis(['snoopy.py'],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher)
-a.datas += [('a.out','/Users/reedcwilson/code/snoopy/a.out','DATA')]
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,

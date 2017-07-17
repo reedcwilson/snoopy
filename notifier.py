@@ -7,6 +7,15 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 
 
+bad_config_message = """you must supply the:
+  'user'
+  'password'
+  'recipient'
+  'device'
+  'token'
+values in the config"""
+
+
 def send_email(user, pwd, recipient, subject, body, attachments=[]):
     to = recipient if type(recipient) is list else [recipient]
     try:
@@ -32,53 +41,57 @@ def send_email(user, pwd, recipient, subject, body, attachments=[]):
 
 
 class Notifier():
-    def __init__(self):
-        self.user, self.pwd, self.to, self.device = self.get_config()
+    def __init__(self, secrets_manager):
+        self.secrets_manager = secrets_manager
+        self.config = self.get_config()
 
     def extract_value(self, string):
         return string.split(":")[1].strip()
 
+    def is_valid(self, config):
+        values = ['user', 'pwd', 'to', 'device', 'token']
+        return all([True for value in values if value in config])
+
     def get_config(self):
-        user = None
-        pwd = None
-        to = None
-        device = None
-        lines = []
-        with open('mail.config', 'r') as f:
-            lines = f.readlines()
+        config = {}
+        config_str = self.secrets_manager.get()
+        lines = config_str.split("\n")
         for line in lines:
             if line.startswith('user'):
-                user = self.extract_value(line)
+                config['user'] = self.extract_value(line)
             elif line.startswith('pwd'):
-                pwd = self.extract_value(line)
+                config['pwd'] = self.extract_value(line)
             elif line.startswith('recipient'):
-                to = self.extract_value(line)
+                config['to'] = self.extract_value(line)
             elif line.startswith('device'):
-                device = self.extract_value(line)
-        if not (user and pwd and to and device):
-            message = """you must supply the:
-              'user'
-              'password'
-              'recipient'
-              'device'
-            values in the config"""
-            print(message)
-        return user, pwd, to, device
+                config['device'] = self.extract_value(line)
+            elif line.startswith('token'):
+                config['token'] = self.extract_value(line)
+        if not self.is_valid(config):
+            print(bad_config_message)
+        return config
 
     def send(self, subject, message=""):
-        if self.user and self.pwd and self.to and self.device:
-            subject = "{}: {}".format(self.device, subject)
-            send_email(self.user, self.pwd, self.to, subject, message)
+        if self.is_valid(self.config):
+            subject = "{}: {}".format(
+                self.config['device'],
+                subject)
+            send_email(
+                self.config['user'],
+                self.config['pwd'],
+                self.config['to'],
+                subject,
+                '{}\ntoken: {}'.format(message, self.config['token']))
 
     def send_screenshots(self, filenames):
-        if self.user and self.pwd and self.to and self.device:
+        if self.is_valid(self.config):
             subject = "{}: {}".format(
-                self.device,
+                self.config['device'],
                 datetime.now().strftime("%c"))
             send_email(
-                self.user,
-                self.pwd,
-                self.to,
+                self.config['user'],
+                self.config['pwd'],
+                self.config['to'],
                 subject,
-                "",
+                "token: {}".format(self.config['token']),
                 filenames)

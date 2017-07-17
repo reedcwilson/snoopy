@@ -1,3 +1,5 @@
 user:      from@gmail.com
 pwd:       password
 recipient: to@gmail.com
+device:    device name
+token:     untouched

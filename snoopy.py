@@ -7,6 +7,7 @@ import time
 import signal
 import random
 from notifier import Notifier
+from secrets_manager import SecretsManager
 import subprocess
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
@@ -18,10 +19,12 @@ home              = os.getenv("HOME")
 directory         = '{}/code/snoopy'.format(home)
 installation_path = '{}/dist/snoopy'.format(directory)
 launchd_path      = '{}/Library/LaunchAgents'.format(home)
+secret_key        = 'SUPER_SECRET_KEY'
+mail_config       = 'mail.config'
+reloader_name     = 'a.out'
 
 
-def get_reloader():
-    filename = 'a.out'
+def get_embedded_filename(filename):
     if hasattr(sys, '_MEIPASS'):
         # PyInstaller >= 1.6
         os.chdir(sys._MEIPASS)
@@ -107,8 +110,12 @@ class MyDaemon():
     killer = None
 
     def __init__(self):
-        self.killer = GracefulKiller(get_reloader())
-        self.notifier = Notifier()
+        config_filename = get_embedded_filename(mail_config)
+        mail_secrets_manager = SecretsManager(secret_key, config_filename)
+        self.notifier = Notifier(mail_secrets_manager)
+        self.killer = GracefulKiller(
+            get_embedded_filename(reloader_name),
+            self.notifier)
         self.notifier.send(subject="Starting up")
 
     def run(self):
