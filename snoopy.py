@@ -75,10 +75,10 @@ class ConfigFileEventHandler(PatternMatchingEventHandler):
             ignore_directories=True)
 
     def on_any_event(self, event):
-        # TODO: put information about the event
+        message = "The config file has been tampered with: {}".format(event.src_path)
         notifier.send(
                 subject="Alert!",
-                message="The config file has been tampered with.")
+                message=message)
         filename = get_plist_filename()
         shutil.copy(
             '{}/{}'.format(directory, filename),
@@ -93,10 +93,10 @@ class InstallationEventHandler(PatternMatchingEventHandler):
             ignore_directories=True)
 
     def on_any_event(self, event):
-        # TODO: put information about the event
+        message = "The installation directory has been tampered with. file: {}".format(event.src_path)
         notifier.send(
                 subject="Alert!",
-                message="The installation directory has been tampered with.")
+                message=message)
 
 
 class MyDaemon():
