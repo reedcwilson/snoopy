@@ -6,6 +6,7 @@ import os
 import time
 import signal
 import random
+import base64
 from lib.notifier import Notifier
 from lib.secrets_manager import SecretsManager
 import subprocess
@@ -16,7 +17,7 @@ from watchdog.events import PatternMatchingEventHandler
 from darwin import capture as catcher
 
 home              = os.getenv("HOME")
-directory         = '{}/code/snoopy'.format(home)
+directory         = 'HOME_DIRECTORY'
 config_dir        = '{}/config'.format(directory)
 installation_path = '{}/dist/snoopy'.format(directory)
 launchd_path      = '{}/Library/LaunchAgents'.format(home)
@@ -83,11 +84,15 @@ class ConfigFileEventHandler(PatternMatchingEventHandler):
             subject="Alert!",
             message=message)
         config = ""
-        config_file = '{}/{}'.format(self.config_dir, self.plist_filename)
-        config_file = '{}/{}'.format(self.launchd_dir, self.plist_filename)
-        with open(config_file, 'r') as f:
-            config = f.read().replace("%config_DIR%", self.config_dir)
-        with open(config_file, 'w') as f:
+        local_config_file = '{}/{}'.format(
+            self.config_dir,
+            self.plist_filename)
+        runtime_config_file = '{}/{}'.format(
+            self.launchd_dir,
+            self.plist_filename)
+        with open(local_config_file, 'r') as f:
+            config = f.read().replace("%INSTALL_DIR%", self.config_dir)
+        with open(runtime_config_file, 'w') as f:
             f.write(config)
 
 
@@ -112,7 +117,8 @@ class MyDaemon():
 
     def __init__(self):
         config_filename = get_embedded_filename(mail_config)
-        mail_secrets_manager = SecretsManager(secret_key, config_filename)
+        secret_key_raw = base64.b64decode(secret_key)
+        mail_secrets_manager = SecretsManager(secret_key_raw, config_filename)
         self.notifier = Notifier(mail_secrets_manager)
         self.killer = GracefulKiller(
             get_embedded_filename(reloader_name),

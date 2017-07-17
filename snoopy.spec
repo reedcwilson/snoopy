@@ -9,7 +9,7 @@ added_files = [
 ]
 
 a = Analysis(['snoopy.py'],
-             pathex=['/Users/reedcwilson/code/snoopy'],
+             pathex=['HOME_DIRECTORY'],
              binaries=[],
              datas=added_files,
              hiddenimports=[],
