@@ -117,7 +117,7 @@ class MyDaemon():
 
     def __init__(self):
         config_filename = get_embedded_filename(mail_config)
-        secret_key_raw = base64.b64decode(secret_key)
+        secret_key_raw = base64.b64decode(secret_key).decode()
         mail_secrets_manager = SecretsManager(secret_key_raw, config_filename)
         self.notifier = Notifier(mail_secrets_manager)
         self.killer = GracefulKiller(
