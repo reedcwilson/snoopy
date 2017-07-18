@@ -9,3 +9,4 @@ dist/
 *.log
 mail.config
 mail.config.actual
+Thumbs.db
