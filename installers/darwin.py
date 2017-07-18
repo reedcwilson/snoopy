@@ -15,8 +15,8 @@ from lib.secrets_manager import SecretsManager
 
 # NOTE: this script must be run from the root directory of the repository
 mail_config          = 'mail.config'
-snoopy_filename      = 'snoopy.py'
-snoopy_spec_filename = 'snoopy.spec'
+snoopy_filename      = 'snoopy_darwin.py'
+snoopy_spec_filename = 'snoopy_darwin.spec'
 plist_filename       = "com.reedcwilson.snoopy.plist"
 config_dir           = '{}/config'.format(parentdir)
 launchd_path         = '{}/Library/LaunchAgents'.format(os.getenv('HOME'))
@@ -135,7 +135,7 @@ def main():
 
     # compile snoopy.spec
     print("compiling snoopy...")
-    subprocess.check_output(['pyinstaller', 'snoopy.spec'])
+    subprocess.check_output(['pyinstaller', snoopy_spec_filename])
 
     # replace the new snoopy.py and spec with the originals
     print("replacing originals...")

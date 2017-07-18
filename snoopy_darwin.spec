@@ -8,7 +8,7 @@ added_files = [
   ('mail.config','.')
 ]
 
-a = Analysis(['snoopy.py'],
+a = Analysis(['snoopy_darwin.py'],
              pathex=['HOME_DIRECTORY'],
              binaries=[],
              datas=added_files,

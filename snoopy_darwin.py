@@ -7,9 +7,11 @@ import time
 import signal
 import random
 import base64
+import subprocess
 from lib.notifier import Notifier
 from lib.secrets_manager import SecretsManager
-import subprocess
+from lib.install_alert import InstallationEventHandler
+from lib.file_finder import get_embedded_filename
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
@@ -24,21 +26,6 @@ launchd_path      = '{}/Library/LaunchAgents'.format(home)
 secret_key        = 'SUPER_SECRET_KEY'
 mail_config       = 'mail.config'
 reloader_name     = 'a.out'
-
-
-def get_embedded_filename(filename):
-    if hasattr(sys, '_MEIPASS'):
-        # PyInstaller >= 1.6
-        os.chdir(sys._MEIPASS)
-        filename = os.path.join(sys._MEIPASS, filename)
-    elif '_MEIPASS2' in os.environ:
-        # PyInstaller < 1.6 (tested on 1.5 only)
-        os.chdir(os.environ['_MEIPASS2'])
-        filename = os.path.join(os.environ['_MEIPASS2'], filename)
-    else:
-        os.chdir(os.path.dirname(sys.argv[0]))
-        filename = os.path.join(os.path.dirname(sys.argv[0]), filename)
-    return filename
 
 
 def get_plist_filename(s=None):
@@ -96,22 +83,6 @@ class ConfigFileEventHandler(PatternMatchingEventHandler):
             f.write(config)
 
 
-class InstallationEventHandler(PatternMatchingEventHandler):
-    def __init__(self, notifier):
-        self.notifier = notifier
-        PatternMatchingEventHandler.__init__(
-            self,
-            patterns=["*"],
-            ignore_directories=True)
-
-    def on_any_event(self, event):
-        message = """The installation directory has been tampered with.
-        file: {}""".format(event.src_path)
-        self.notifier.send(
-            subject="Alert!",
-            message=message)
-
-
 class MyDaemon():
     killer = None
 
@@ -148,10 +119,6 @@ class MyDaemon():
             time.sleep(random.randint(120, 600))
 
 
-def main():
+if __name__ == "__main__":
     daemon = MyDaemon()
     daemon.run()
-
-
-if __name__ == "__main__":
-    main()
