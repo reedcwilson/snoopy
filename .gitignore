@@ -1,5 +1,7 @@
 *.png
 *.pyc
+*.obj
+reload_service.exe
 __pycache__/
 a.out
 close-*

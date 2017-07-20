@@ -9,13 +9,13 @@ import win32process
 
 def capture(directory):
     filename = 'C:\\Users\\rwilson\\code\\snoopy\\screen.png'
-    process = 'C:\\Users\\rwilson\\code\\snoopy\\win32\\nircmd.exe'
+    process = 'C:\\Users\\rwilson\\code\\snoopy\\win32\\capture.exe'
     session_id = windll.kernel32.WTSGetActiveConsoleSessionId()
     token = win32ts.WTSQueryUserToken(session_id)
     win32process.CreateProcessAsUser(
         token,
         process,
-        'nircmd.exe savescreenshotfull {}'.format(filename),
+        'capture.exe savescreenshotfull {}'.format(filename),
         None,
         None,
         True,
@@ -23,6 +23,7 @@ def capture(directory):
         None,
         None,
         win32process.STARTUPINFO())
+    # wait just a little for the screenshot to be captured
     time.sleep(1)
     return [filename]
 

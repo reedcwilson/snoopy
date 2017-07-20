@@ -32,6 +32,9 @@ class Daemon():
             recursive=False)
         self.notifier.send(subject="Starting up")
 
+    def get_notifier(self):
+        return self.notifier
+
     def setup(self):
         print("perform setup functionality in your subclass")
 
