@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import traceback
 from lib.daemon import Daemon
 from win32.killer import GracefulKiller
 from win32 import capture as catcher
@@ -42,6 +43,12 @@ class MyDaemon(Daemon):
         pass
 
 
+ASADMIN = 'asadmin'
 if __name__ == "__main__":
-    daemon = MyDaemon()
-    daemon.run()
+    try:
+        daemon = MyDaemon()
+        daemon.run()
+    except Exception as e:
+        print(str(e))
+        traceback.print_exc()
+        print("shutting down...")

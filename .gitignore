@@ -10,3 +10,4 @@ dist/
 mail.config
 mail.config.actual
 Thumbs.db
+.DS_Store
