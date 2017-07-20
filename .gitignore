@@ -11,5 +11,6 @@ dist/
 *.log
 mail.config
 mail.config.actual
+windows_mail.config
 Thumbs.db
 .DS_Store
