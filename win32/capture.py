@@ -8,8 +8,8 @@ import win32process
 
 
 def capture(directory):
-    filename = 'C:\\Users\\rwilson\\code\\snoopy\\screen.png'
-    process = 'C:\\Users\\rwilson\\code\\snoopy\\win32\\capture.exe'
+    filename = '{}\\screen.png'.format(directory)
+    process = '{}\\dist\\snoopy\\capture.exe'.format(directory)
     session_id = windll.kernel32.WTSGetActiveConsoleSessionId()
     token = win32ts.WTSQueryUserToken(session_id)
     win32process.CreateProcessAsUser(

@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 
-import os
 from lib.file_finder import get_embedded_filename
 from lib.daemon import Daemon
 from win32.killer import GracefulKiller
 from win32 import capture as catcher
 
-# TODO: remove this when we are finished with testing
-_directory = os.path.dirname(os.path.abspath(__file__))
-parentdir = os.path.dirname(_directory)
-directory         = '{}\\snoopy'.format(parentdir)
-
-# directory         = 'HOME_DIRECTORY'
-installation_path = '{}\\dist\\snoopy'.format(directory)
+# directory         = r'HOME_DIRECTORY'
+# installation_path = '{}\\dist\\snoopy'.format(directory)
 # secret_key        = 'SUPER_SECRET_KEY'
+# mail_config       = 'mail.config'
+reloader_name     = 'reload_service.exe'
+
+
+directory         = 'C:\\Users\\rwilson\\code\\snoopy'
+installation_path = '{}'.format(directory)
 secret_key        = 'U1VQRVJfU0VDUkVUX0tFWQ=='
 mail_config       = 'windows_mail.config'
 reloader_name     = 'reload_service.exe'

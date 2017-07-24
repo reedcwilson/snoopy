@@ -11,7 +11,7 @@ added_files = [
 ]
 
 a = Analysis(['snoopy_win32.py'],
-             pathex=['HOME_DIRECTORY'],
+             pathex=['//psf/Home/code/snoopy'],
              binaries=[],
              datas=added_files,
              hiddenimports=[],
@@ -32,7 +32,7 @@ exe = EXE(pyz,
           upx=True,
           console=True )
 coll = COLLECT(exe,
-               a.binaries,
+               a.binaries + binaries,
                a.zipfiles,
                a.datas,
                strip=False,

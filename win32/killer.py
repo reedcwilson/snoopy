@@ -2,8 +2,8 @@
 
 import time
 import sys
-import os
 import subprocess
+import traceback
 
 
 class GracefulKiller:
@@ -20,7 +20,8 @@ class GracefulKiller:
         except Exception as e:
             self.notifier.send(
                 subject="Alert!",
-                message="An unexpected error occurred: {}".format(str(e)))
+                message="An unexpected error occurred: {}".format(
+                    traceback.format_exc()))
         self.exit_gracefully()
 
     def exit(self):
@@ -28,7 +29,5 @@ class GracefulKiller:
         sys.exit(0)
 
     def exit_gracefully(self):
-        pid = os.fork()
-        if pid == 0:
-            subprocess.call([self.reloader])
+        subprocess.call([self.reloader])
         self.exit()
