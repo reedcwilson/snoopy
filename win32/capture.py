@@ -1,5 +1,3 @@
-#!/usr/local/env python
-
 import time
 from ctypes import windll
 import win32ts

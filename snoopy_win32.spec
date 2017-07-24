@@ -32,7 +32,7 @@ exe = EXE(pyz,
           upx=True,
           console=True )
 coll = COLLECT(exe,
-               a.binaries + binaries,
+               a.binaries,
                a.zipfiles,
                a.datas,
                strip=False,

@@ -29,7 +29,14 @@ def load_plist(filename):
 def main():
     helper = Helper()
     helper.create_config()
-    helper.replace_tokens(snoopy_filename, snoopy_spec_filename)
+
+    tokens = {
+        "SUPER_SECRET_KEY": helper.get_encoded_secret(),
+        "HOME_DIRECTORY": parentdir
+    }
+    helper.prepare_file(snoopy_filename, tokens)
+    tokens = {"HOME_DIRECTORY": parentdir}
+    helper.prepare_file(snoopy_spec_filename, tokens)
 
     # install python dependencies
 
@@ -39,7 +46,8 @@ def main():
 
     helper.compile(snoopy_spec_filename)
 
-    helper.replace_originals(snoopy_filename, snoopy_spec_filename)
+    helper.replace_original(snoopy_filename)
+    helper.replace_original(snoopy_spec_filename)
 
     local_config_file = '{}/{}'.format(
         config_dir,

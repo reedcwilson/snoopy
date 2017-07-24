@@ -21,7 +21,7 @@ def replace_tokens(string, tokens, filename):
         string = string.replace(key, value)
     original_filename = "ORIGINAL_{}".format(filename)
     shutil.copy(filename, original_filename)
-    with open(filename, 'w') as f:
+    with open(filename, 'w', newline='\n') as f:
         f.write(string)
 
 
@@ -67,17 +67,27 @@ def ensure_clean_directory():
     purge(parentdir, "reload_service.obj")
 
 
-def prepare_file(filename, tokens):
-    string = ""
-    with open(filename, 'r') as f:
-        string = f.read()
-    replace_tokens(string, tokens, filename)
-
-
 class Helper:
     def __init__(self):
         ensure_clean_directory()
         self.secret_key = None
+
+    def prepare_file(self, filename, tokens):
+        string = ""
+        with open(filename, 'r') as f:
+            string = f.read()
+        replace_tokens(string, tokens, filename)
+
+    def replace_original(self, filename):
+        original = 'ORIGINAL_{}'.format(filename)
+        shutil.copy(original, filename)
+        os.remove(original)
+
+    def get_encoded_secret(self):
+        if not self.secret_key:
+            print("secret key not set -- did you call create_config first?")
+            sys.exit(-1)
+        return base64.b64encode(self.secret_key.encode()).decode()
 
     def create_config(self):
         inputs = {}
@@ -106,34 +116,7 @@ class Helper:
         secrets_manager = SecretsManager(self.secret_key, mail_config)
         secrets_manager.put(config_str)
 
-    def replace_tokens(self, program, spec):
-        """must be called after create_config so that we have the secret key"""
-        # embed key in copy of snoopy.py and replace installation directory
-        if not self.secret_key:
-            print("secret key not set -- did you call create_config first?")
-            sys.exit(-1)
-        encoded_secret = base64.b64encode(self.secret_key.encode()).decode()
-        tokens = {
-            "SUPER_SECRET_KEY": encoded_secret,
-            "HOME_DIRECTORY": parentdir
-        }
-        prepare_file(program, tokens)
-
-        # replace tokens in snoopy.spec
-        tokens = {"HOME_DIRECTORY": parentdir}
-        prepare_file(spec, tokens)
-
     def compile(self, filename):
         # compile snoopy.spec
         print("compiling snoopy...")
-        subprocess.check_output(['pyinstaller', filename])
-
-    def replace_originals(self, snoopy_filename, snoopy_spec_filename):
-        # replace the new snoopy.py and spec with the originals
-        print("replacing originals...")
-        snoopy_original = 'ORIGINAL_{}'.format(snoopy_filename)
-        spec_original = 'ORIGINAL_{}'.format(snoopy_spec_filename)
-        shutil.copy(snoopy_original, snoopy_filename)
-        shutil.copy(spec_original, snoopy_spec_filename)
-        os.remove(snoopy_original)
-        os.remove(spec_original)
+        subprocess.check_output(['pyinstaller', '-y', filename])
