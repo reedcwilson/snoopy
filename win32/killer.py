@@ -16,18 +16,23 @@ class GracefulKiller:
         try:
             self.daemon.run()
         except KeyboardInterrupt as e:
-            self.notifier.send(subject="Shutting down")
+            print("Shutting down...")
+            self.notifier.send(subject="Shutting down...")
         except Exception as e:
             self.notifier.send(
                 subject="Alert!",
                 message="An unexpected error occurred: {}".format(
                     traceback.format_exc()))
+        print("restarting...")
         self.exit_gracefully()
 
     def exit(self):
-        time.sleep(2)
+        time.sleep(0.5)
         sys.exit(0)
 
     def exit_gracefully(self):
-        subprocess.call([self.reloader])
-        self.exit()
+        with open("c:\\killer.out", 'a') as f:
+            f.write("launching subprocess\n")
+            subprocess.Popen(["cmd", "/C", self.reloader])
+            f.write("finished launching subprocess\n")
+            self.exit()

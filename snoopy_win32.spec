@@ -11,7 +11,7 @@ added_files = [
 ]
 
 a = Analysis(['snoopy_win32.py'],
-             pathex=['//psf/Home/code/snoopy'],
+             pathex=['HOME_DIRECTORY'],
              binaries=[],
              datas=added_files,
              hiddenimports=[],

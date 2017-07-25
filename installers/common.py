@@ -63,6 +63,7 @@ def ensure_clean_directory():
     purge(parentdir, ".*png$")
     purge(parentdir, ".*log$")
     purge(parentdir, ".*out$")
+    purge(parentdir, ".*err$")
     purge(parentdir, "reload_service.exe")
     purge(parentdir, "reload_service.obj")
 

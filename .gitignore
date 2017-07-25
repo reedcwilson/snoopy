@@ -8,6 +8,7 @@ close-*
 build/
 dist/
 *.out
+*.err
 *.log
 mail.config
 mail.config.actual
