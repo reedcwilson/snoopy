@@ -1,16 +1,16 @@
 #!/usr/local/env python
 
-import time
 import sys
-import subprocess
+import zerorpc
 import traceback
 
 
 class GracefulKiller:
-    def __init__(self, daemon, reloader):
+    def __init__(self, daemon, secret, port):
         self.daemon = daemon
         self.notifier = daemon.get_notifier()
-        self.reloader = reloader
+        self.secret = secret
+        self.port = port
 
     def run(self):
         try:
@@ -23,16 +23,12 @@ class GracefulKiller:
                 subject="Alert!",
                 message="An unexpected error occurred: {}".format(
                     traceback.format_exc()))
-        print("restarting...")
-        self.exit_gracefully()
+        self.exit()
 
     def exit(self):
-        time.sleep(0.5)
+        print('here')
+        c = zerorpc.Client()
+        c.connect("tcp://127.0.0.1:{}".format(self.port))
+        print('relaunching')
+        c.relaunch()
         sys.exit(0)
-
-    def exit_gracefully(self):
-        with open("c:\\killer.out", 'a') as f:
-            f.write("launching subprocess\n")
-            subprocess.Popen(["cmd", "/C", self.reloader])
-            f.write("finished launching subprocess\n")
-            self.exit()

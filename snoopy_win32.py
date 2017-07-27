@@ -27,8 +27,6 @@ class MyDaemon(Daemon):
 
 
 if __name__ == "__main__":
-    # import subprocess
-    # subprocess.Popen([reloader_name])
     killer = GracefulKiller(
         MyDaemon(),
         get_embedded_filename(reloader_name))
