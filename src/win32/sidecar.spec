@@ -3,16 +3,10 @@
 block_cipher = None
 
 
-added_files = [
-  ('src/win32/nssm.exe','.'),
-  ('src/win32/capture.exe','.'),
-  ('mail.config','.')
-]
-
-snoopy = Analysis(['src/snoopy_win32.py'],
-             pathex=['HOME_DIRECTORY'],
+sidecar = Analysis(['sidecar.py'],
+             pathex=['c:\\Users\\rwilson\\code\\snoopy\\src\\win32'],
              binaries=[],
-             datas=added_files,
+             datas=[],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -20,20 +14,20 @@ snoopy = Analysis(['src/snoopy_win32.py'],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher)
-pyz = PYZ(snoopy.pure, snoopy.zipped_data,
+pyz = PYZ(sidecar.pure, sidecar.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
-          snoopy.scripts,
+          sidecar.scripts,
           exclude_binaries=True,
-          name='snoopy',
+          name='sidecar',
           debug=False,
           strip=False,
           upx=True,
           console=True )
 coll = COLLECT(exe,
-               snoopy.binaries,
-               snoopy.zipfiles,
-               snoopy.datas,
+               sidecar.binaries,
+               sidecar.zipfiles,
+               sidecar.datas,
                strip=False,
                upx=True,
-               name='snoopy')
+               name='sidecar')

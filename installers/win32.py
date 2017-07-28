@@ -3,18 +3,20 @@
 import os
 import time
 import subprocess
-import shutil
 from common import Helper
 
 # NOTE: this script must be run from the root directory of the repository
-_directory           = os.path.dirname(os.path.abspath(__file__))
-parentdir            = os.path.dirname(_directory)
-snoopy_filename      = 'snoopy_win32.py'
-snoopy_spec_filename = 'snoopy_win32.spec'
-c_file               = 'reload_service.c'
-nssm_file            = '{}\\win32\\nssm.exe'.format(parentdir)
-snoopy               = '{}\\dist\\snoopy\\snoopy.exe'.format(parentdir)
-service              = 'snoopy'
+_directory            = os.path.dirname(os.path.abspath(__file__))
+parentdir             = os.path.dirname(_directory)
+snoopy_filename       = r'src\snoopy_win32.py'
+sidecar_filename      = r'src\win32\sidecar.py'
+snoopy_spec_filename  = r'src\snoopy_win32.spec'
+sidecar_spec_filename = r'src\win32\sidecar.spec'
+nssm_file             = r'{}\src\win32\nssm.exe'.format(parentdir)
+snoopy                = r'{}\dist\snoopy\snoopy.exe'.format(parentdir)
+sidecar               = r'{}\dist\sidecar\sidecar.exe'.format(parentdir)
+snoopy_service        = 'snoopy'
+sidecar_service       = 'sidecar'
 
 
 def nssm(args, wait=True):
@@ -25,38 +27,41 @@ def nssm(args, wait=True):
         c.wait()
 
 
-def install():
+def install(serv, exe):
     print("installing service...")
     nssm([
         'install',
-        service,
-        snoopy
+        serv,
+        exe
     ])
-    nssm(['set', service, 'AppStopMethodSkip', '6'])
-    nssm(['set', service, 'AppDirectory', '{}'.format(parentdir)])
-    nssm(['set', service, 'AppStdout', '{}\\windows.out'.format(parentdir)])
-    nssm(['set', service, 'AppStderr', '{}\\windows.err'.format(parentdir)])
+    nssm(['set', serv, 'AppStopMethodSkip', '6'])
+    nssm(['set', serv, 'AppDirectory', '{}'.format(parentdir)])
+    nssm(['set', serv, 'AppStdout', r'{}\{}.out'.format(parentdir, serv)])
+    nssm(['set', serv, 'AppStderr', r'{}\{}.err'.format(parentdir, serv)])
 
 
-def start():
+def start(serv):
     print("starting service...")
-    nssm(['start', service])
+    nssm(['start', serv])
 
 
-def cleanup():
+def cleanup(serv):
     print("cleaning up...")
-    nssm(['stop', service], False)
-    cmd = subprocess.Popen(['sc', 'delete', service])
+    nssm(['stop', serv], False)
+    cmd = subprocess.Popen(['sc', 'delete', serv])
     cmd.wait()
     time.sleep(1)
 
 
 def main():
-    cleanup()
+    cleanup(snoopy_service)
+    cleanup(sidecar_service)
     home_directory = parentdir.replace('\\', '\\\\')
 
     helper = Helper()
     helper.create_config()
+
+    # REPLACE TOKENS
 
     tokens = {
         "SUPER_SECRET_KEY": helper.get_encoded_secret(),
@@ -64,34 +69,38 @@ def main():
     }
     helper.prepare_file(snoopy_filename, tokens)
 
-    tokens = {"HOME_DIRECTORY": home_directory}
+    tokens = {
+        "SUPER_SECRET_KEY": helper.get_encoded_secret(),
+        "HOME_DIRECTORY": home_directory
+    }
+    helper.prepare_file(sidecar_filename, tokens)
+
+    tokens = {"HOME_DIRECTORY": r'{}\src'.format(home_directory)}
     helper.prepare_file(snoopy_spec_filename, tokens)
 
-    tokens = {"HOME_DIRECTORY": home_directory}
-    shutil.copy(
-        "{}\\win32\\{}".format(home_directory, c_file),
-        "{}\\{}".format(home_directory, c_file))
-    helper.prepare_file(c_file, tokens)
+    tokens = {"HOME_DIRECTORY": r'{}\win32\src'.format(home_directory)}
+    helper.prepare_file(sidecar_spec_filename, tokens)
 
-    # install python dependencies
+    # INSTALL PYTHON DEPENDENCIES
 
-    # compile reloader -- needs to happen before we install snoopy
-    print("compiling reloader...")
-    subprocess.check_output([
-        "{}\\installers\\c_compile_windows.bat".format(home_directory)
-    ])
+    # COMPILE PROGRAMS
 
     helper.compile(snoopy_spec_filename)
-    helper.replace_original(snoopy_filename)
-    helper.replace_original(snoopy_spec_filename)
-    helper.replace_original(c_file)
-    os.remove(c_file)
-    os.remove('reload_service.exe')
-    os.remove('reload_service.obj')
+    helper.compile(sidecar_spec_filename)
 
-    install()
+    # CLEANUP
+    helper.replace_original(snoopy_filename)
+    helper.replace_original(sidecar_filename)
+    helper.replace_original(snoopy_spec_filename)
+    helper.replace_original(sidecar_spec_filename)
+
+    # INSTART
+    install(snoopy_service, snoopy)
+    install(sidecar_service, sidecar)
     time.sleep(2)
-    start()
+    start(snoopy_service)
+    start(sidecar_service)
+
     print("finished!")
 
 

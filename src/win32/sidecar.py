@@ -3,11 +3,9 @@ from killer import GracefulKiller
 import threading
 import time
 
-# directory         = 'HOME_DIRECTORY'
-directory         = r'C:\Users\rwilson\code\snoopy'
+directory         = 'HOME_DIRECTORY'
 installation_path = r'{}\dist\snoopy'.format(directory)
-service           = 'sample'
-secret_key        = 'SUPER_SECRET_KEY'
+service           = 'snoopy'
 
 
 class Notifier():
@@ -24,17 +22,15 @@ class Daemon():
 
     def run(self):
         while True:
-            time.sleep(1)
+            time.sleep(10)
 
 
 def create_reloader():
     ServiceReloader(
-        # r'{}\nssm.exe'.format(installation_path),
-        r'{}\win32\nssm.exe'.format(directory),
+        r'{}\nssm.exe'.format(installation_path),
         service,
         directory,
-        # [r'{}\{}.exe'.format(installation_path, service)],
-        ['python', r'{}\win32\{}.py'.format(directory, service)],
+        [r'{}\{}.exe'.format(installation_path, service)],
         7110
     )
 
@@ -45,7 +41,6 @@ def main():
     t.start()
     killer = GracefulKiller(
         Daemon(),
-        secret_key,
         7111)
     killer.run()
 

@@ -1,5 +1,5 @@
 import zerorpc
-from launcher import NssmLauncher
+from win32.launcher import NssmLauncher
 import threading
 import time
 

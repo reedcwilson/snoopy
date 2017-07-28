@@ -4,12 +4,12 @@ block_cipher = None
 
 
 added_files = [
-  ('src/win32/nssm.exe','.'),
-  ('src/win32/capture.exe','.'),
+  ('win32/nssm.exe','.'),
+  ('win32/capture.exe','.'),
   ('mail.config','.')
 ]
 
-snoopy = Analysis(['src/snoopy_win32.py'],
+snoopy = Analysis(['snoopy_win32.py'],
              pathex=['HOME_DIRECTORY'],
              binaries=[],
              datas=added_files,

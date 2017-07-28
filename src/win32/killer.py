@@ -6,10 +6,9 @@ import traceback
 
 
 class GracefulKiller:
-    def __init__(self, daemon, secret, port):
+    def __init__(self, daemon, port):
         self.daemon = daemon
         self.notifier = daemon.get_notifier()
-        self.secret = secret
         self.port = port
 
     def run(self):
@@ -26,7 +25,6 @@ class GracefulKiller:
         self.exit()
 
     def exit(self):
-        print('here')
         c = zerorpc.Client()
         c.connect("tcp://127.0.0.1:{}".format(self.port))
         print('relaunching')

@@ -29,7 +29,7 @@ class Daemon():
         self.observer.schedule(
             installation_event_handler,
             installation_path,
-            recursive=False)
+            recursive=True)
         self.notifier.send(subject="Starting up")
 
     def get_notifier(self):
