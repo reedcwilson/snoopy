@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 
-# import imp
 import os
+import Quartz
 from lib.file_finder import get_embedded_filename
 from lib.daemon import Daemon
 from darwin.killer import GracefulKiller
 from darwin.config_event_handler import ConfigFileEventHandler
 from darwin import capture as catcher
+
+# NOTE: the Quartz module is part of the pyobjc install
+# pip install pyobjc
 
 home              = os.getenv("HOME")
 directory         = 'HOME_DIRECTORY'
@@ -32,6 +35,13 @@ class MyDaemon(Daemon):
             installation_path,
             directory,
             catcher)
+
+    def should_execute():
+        d = Quartz.CGSessionCopyCurrentDictionary()
+        return (
+            d and
+            d.get("CGSSessionScreenIsLocked", 0) == 0 and
+            d.get("kCGSSessionOnConsoleKey", 0) == 1)
 
     def setup(self):
         # the graceful killer registers events on init

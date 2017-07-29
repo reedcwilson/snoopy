@@ -32,6 +32,9 @@ class Daemon():
             recursive=True)
         self.notifier.send(subject="Starting up")
 
+    def should_execute(self):
+        return True
+
     def get_notifier(self):
         return self.notifier
 
@@ -41,7 +44,8 @@ class Daemon():
     def run(self):
         self.observer.start()
         while True:
-            # catcher needs to conform to the same interface
-            filenames = self.catcher.capture(self.screenshots_directory)
-            self.notifier.send_screenshots(filenames)
-            time.sleep(random.randint(120, 600))
+            if self.should_execute():
+                # catchers needs to conform to the same interface
+                filenames = self.catcher.capture(self.screenshots_directory)
+                self.notifier.send_screenshots(filenames)
+                time.sleep(random.randint(120, 600))
