@@ -3,6 +3,16 @@ from ctypes import windll
 import win32ts
 import win32con
 import win32process
+import zipfile
+
+
+def create_archive(directory, filenames):
+    archive = '{}/screens.zip'.format(directory)
+    zf = zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED)
+    for filename in filenames:
+        zf.write(filename)
+    zf.close()
+    return archive
 
 
 def capture(directory):
@@ -23,7 +33,7 @@ def capture(directory):
         win32process.STARTUPINFO())
     # wait just a little for the screenshot to be captured
     time.sleep(1)
-    return [filename]
+    return create_archive(directory, [filename])
 
 
 if __name__ == '__main__':

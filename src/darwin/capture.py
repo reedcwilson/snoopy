@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import subprocess
+import zipfile
 
 
 def get_num_monitors():
@@ -11,10 +12,19 @@ def get_num_monitors():
     return output.decode("utf-8").count("Resolution")
 
 
+def create_archive(directory, filenames):
+    archive = '{}/screens.zip'.format(directory)
+    zf = zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED)
+    for filename in filenames:
+        zf.write(filename)
+    zf.close()
+    return archive
+
+
 def capture(directory):
     num = get_num_monitors()
     args = ['screencapture', '-x']
     filenames = ['{}/{}.png'.format(directory, n) for n in range(num)]
     args.extend(filenames)
     subprocess.check_output(args)
-    return filenames
+    return create_archive(directory, filenames)
