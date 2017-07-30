@@ -29,8 +29,9 @@ The Collector is a Mac service that runs every 30 minutes and will download and
 unzip the attachments for the emails with the 'Monitoring' label and then delete
 the emails. These images can be viewed in the `INSTALLATION_DIR/src`.
 
-Before running the installation you will need to enable the Gmail API. Follow
-[this wizard](https://console.developers.google.com/flows/enableapi?apiid=gmail).
+Before running the installation you will need to enable the Gmail API and
+download the client secret and save it as `client_secret.json`. Follow [this
+wizard](https://console.developers.google.com/flows/enableapi?apiid=gmail).
 
 You will need go through the OAuth wizard and accept the permissions request the
 first time it runs.
