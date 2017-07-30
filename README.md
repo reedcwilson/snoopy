@@ -21,3 +21,17 @@ directory and follow the prompts:
   the program configuration hasn't been tampered with. This should be secret.
 - `secret`: A secret key that snoopy will use to encrypt secrets so they cannot
   be viewed by the user on the machine.
+  
+
+### Collector
+
+The Collector is a Mac service that runs every 30 minutes and will download and
+unzip the attachments for the emails with the 'Monitoring' label and then delete
+the emails. These images can be viewed in the `INSTALLATION_DIR/src`.
+
+You will need go through the OAuth wizard and accept the permissions request the
+first time it runs.
+
+```
+./installers/collector.py
+```
