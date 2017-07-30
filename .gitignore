@@ -15,3 +15,5 @@ mail.config.actual
 windows_mail.config
 Thumbs.db
 .DS_Store
+client_secret.json
+*ORIGINAL*

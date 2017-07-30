@@ -1,0 +1,63 @@
+import sys
+import getpass
+import os
+
+_directory = os.path.dirname(os.path.abspath(__file__))
+parentdir = os.path.dirname(_directory)
+os.sys.path.insert(0, parentdir)
+from src.lib.secrets_manager import SecretsManager
+
+mail_config = 'mail.config'
+
+
+def extract_value(string):
+    return string.split(":")[1].strip()
+
+
+def load_inputs(filename):
+    config = {}
+    config_str = ""
+    with open(filename, 'r') as f:
+        config_str = f.read()
+    lines = config_str.split("\n")
+    for line in lines:
+        if line.startswith('user'):
+            config['user'] = extract_value(line)
+        elif line.startswith('pwd'):
+            config['pwd'] = extract_value(line)
+        elif line.startswith('recipient'):
+            config['recipient'] = extract_value(line)
+        elif line.startswith('device'):
+            config['device'] = extract_value(line)
+        elif line.startswith('token'):
+            config['token'] = extract_value(line)
+    return config
+
+
+class ConfigHelper:
+    def create_config(self):
+        inputs = {}
+        # you can pass a mail.config filename to be faster
+        if len(sys.argv) > 1:
+            inputs = load_inputs(sys.argv[1])
+        else:
+            # accept username, password, recipient, device, token
+            inputs['user'] = input("gmail username: ")
+            inputs['pwd'] = getpass.getpass("gmail password: ")
+            inputs['recipient'] = input("recipient of emails: ")
+            inputs['device'] = input("name of device: ")
+            inputs['token'] = getpass.getpass("secure token: ")
+
+        # create config
+        config_str = ""
+        for key, value in inputs.items():
+            config_str += "{}:{}\n".format(key, value)
+
+        # accept the secret encryption key
+        self.secret_key = getpass.getpass("secret (should not equal token): ")
+
+        print("preparing files...")
+
+        # encrypt the mail config
+        secrets_manager = SecretsManager(self.secret_key, mail_config)
+        secrets_manager.put(config_str)

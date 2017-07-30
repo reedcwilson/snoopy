@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>KeepAlive</key>
+	<true/>
+	<key>Label</key>
+	<string>com.reedcwilson.collector</string>
+	<key>Program</key>
+  <string>%INSTALL_DIR%/dist/collector/collector</string>
+	<key>RunAtLoad</key>
+	<true/>
+  <key>StandardOutPath</key>
+  <string>%INSTALL_DIR%/collector.log</string>
+  <key>StandardErrorPath</key>
+  <string>%INSTALL_DIR%/collector.log</string>
+  <key>StartInterval</key>
+  <integer>1800</integer>
+</dict>
+</plist>

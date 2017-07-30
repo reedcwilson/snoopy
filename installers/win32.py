@@ -4,6 +4,7 @@ import os
 import time
 import subprocess
 from common import Helper
+from config_helper import ConfigHelper
 
 # NOTE: this script must be run from the root directory of the repository
 _directory            = os.path.dirname(os.path.abspath(__file__))
@@ -59,7 +60,8 @@ def main():
     home_directory = parentdir.replace('\\', '\\\\')
 
     helper = Helper()
-    helper.create_config()
+    config_helper = ConfigHelper()
+    config_helper.create_config()
 
     # REPLACE TOKENS
 
