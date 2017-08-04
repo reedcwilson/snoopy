@@ -8,7 +8,7 @@ parentdir = os.path.dirname(_directory)
 os.sys.path.insert(0, parentdir)
 from src.lib.secrets_manager import SecretsManager
 
-mail_config = 'mail.config'
+mail_config = 'src/mail.config'
 
 
 def extract_value(string):

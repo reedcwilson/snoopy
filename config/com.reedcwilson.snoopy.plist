@@ -11,8 +11,8 @@
 	<key>RunAtLoad</key>
 	<true/>
   <key>StandardOutPath</key>
-  <string>%INSTALL_DIR%/out.log</string>
+  <string>%INSTALL_DIR%/snoopy.out</string>
   <key>StandardErrorPath</key>
-  <string>%INSTALL_DIR%/err.log</string>
+  <string>%INSTALL_DIR%/snoopy.err</string>
 </dict>
 </plist>

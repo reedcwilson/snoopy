@@ -42,7 +42,8 @@ int main(int argc, char **argv) {
   } else {
     switch (WEXITSTATUS(loaded)) {
       case 1:
-        sprintf(filename, "%s/Library/LaunchAgents/%s", getenv("HOME"), PLIST);
+        //sprintf(filename, "%s/Library/LaunchAgents/%s", getenv("HOME"), PLIST);
+        sprintf(filename, "/Library/LaunchAgents/%s", PLIST);
         launch(filename);
         break;
       case 0:

@@ -44,6 +44,7 @@ class Daemon():
         print("perform setup functionality in your subclass")
 
     def run(self):
+        self.setup()
         self.observer.start()
         while True:
             if self.should_execute():
