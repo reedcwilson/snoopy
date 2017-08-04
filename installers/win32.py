@@ -66,13 +66,13 @@ def main():
     # REPLACE TOKENS
 
     tokens = {
-        "SUPER_SECRET_KEY": helper.get_encoded_secret(),
+        "SUPER_SECRET_KEY": config_helper.get_encoded_secret(),
         "HOME_DIRECTORY": home_directory
     }
     helper.prepare_file(snoopy_filename, tokens)
 
     tokens = {
-        "SUPER_SECRET_KEY": helper.get_encoded_secret(),
+        "SUPER_SECRET_KEY": config_helper.get_encoded_secret(),
         "HOME_DIRECTORY": home_directory
     }
     helper.prepare_file(sidecar_filename, tokens)

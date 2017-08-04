@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import subprocess
+import os
 import zipfile
 
 
@@ -16,7 +17,7 @@ def create_archive(directory, filenames):
     archive = '{}/screens.zip'.format(directory)
     zf = zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED)
     for filename in filenames:
-        zf.write(filename)
+        zf.write(filename, arcname=os.path.basename(filename))
     zf.close()
     return archive
 
@@ -27,4 +28,8 @@ def capture(directory):
     filenames = ['{}/{}.png'.format(directory, n) for n in range(num)]
     args.extend(filenames)
     subprocess.check_output(args)
-    return create_archive(directory, filenames)
+    return [create_archive(directory, filenames)]
+
+
+if __name__ == '__main__':
+    capture('./')

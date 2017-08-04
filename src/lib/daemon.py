@@ -3,6 +3,7 @@
 import time
 import random
 import base64
+import sys
 from watchdog.observers import Observer
 from .install_alert import InstallationEventHandler
 from .secrets_manager import SecretsManager
@@ -18,6 +19,7 @@ class Daemon():
             installation_path,
             screenshots_directory,
             catcher):
+        self.sleep_seconds = sys.maxsize
         self.catcher = catcher
         self.screenshots_directory = screenshots_directory
         config_filename = get_embedded_filename(mail_config)
@@ -48,4 +50,5 @@ class Daemon():
                 # catchers needs to conform to the same interface
                 filenames = self.catcher.capture(self.screenshots_directory)
                 self.notifier.send_screenshots(filenames)
-                time.sleep(random.randint(120, 600))
+            self.sleep_seconds = random.randint(120, 600)
+            time.sleep(self.sleep_seconds)

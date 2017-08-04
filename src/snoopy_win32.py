@@ -23,6 +23,9 @@ class MyDaemon(Daemon):
             directory,
             catcher)
 
+    def should_execute(self):
+        return True
+
     def setup(self):
         pass
 

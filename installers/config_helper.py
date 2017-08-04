@@ -1,6 +1,7 @@
 import sys
 import getpass
 import os
+import base64
 
 _directory = os.path.dirname(os.path.abspath(__file__))
 parentdir = os.path.dirname(_directory)
@@ -35,6 +36,15 @@ def load_inputs(filename):
 
 
 class ConfigHelper:
+    def __init__(self):
+        self.secret_key = None
+
+    def get_encoded_secret(self):
+        if not self.secret_key:
+            print("secret key not set -- did you call create_config first?")
+            sys.exit(-1)
+        return base64.b64encode(self.secret_key.encode()).decode()
+
     def create_config(self):
         inputs = {}
         # you can pass a mail.config filename to be faster

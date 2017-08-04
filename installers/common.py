@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import base64
-import sys
 import shutil
 import re
 import os
@@ -36,6 +34,7 @@ def ensure_clean_directory():
     purge(parentdir, ".*log$")
     purge(parentdir, ".*out$")
     purge(parentdir, ".*err$")
+    purge(parentdir, ".*zip$")
     purge(parentdir, "reload_service.exe")
     purge(parentdir, "reload_service.obj")
 
@@ -50,7 +49,6 @@ def get_altered_filename(filename, backup=True):
 class Helper:
     def __init__(self):
         ensure_clean_directory()
-        self.secret_key = None
 
     def prepare_file(self, filename, tokens):
         string = ""
@@ -62,12 +60,6 @@ class Helper:
         original = get_altered_filename(filename)
         shutil.copy(original, filename)
         os.remove(original)
-
-    def get_encoded_secret(self):
-        if not self.secret_key:
-            print("secret key not set -- did you call create_config first?")
-            sys.exit(-1)
-        return base64.b64encode(self.secret_key.encode()).decode()
 
     def compile(self, filename):
         # compile snoopy.spec

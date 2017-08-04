@@ -1,9 +1,12 @@
 import smtplib
+import logging
 from os.path import basename
 from datetime import datetime
+from email import encoders
 from email.utils import COMMASPACE, formatdate
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
+from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
 
@@ -16,7 +19,7 @@ bad_config_message = """you must supply the:
 values in the config"""
 
 
-def send_email(user, pwd, recipient, subject, body, attachments=[]):
+def send_email(user, pwd, recipient, subject, body, attachments=[], archive=True):
     to = recipient if type(recipient) is list else [recipient]
     try:
         msg = MIMEMultipart()
@@ -27,17 +30,29 @@ def send_email(user, pwd, recipient, subject, body, attachments=[]):
         msg.attach(MIMEText(body, 'plain'))
         for attachment in attachments:
             with open(attachment, 'rb') as f:
-                image = MIMEImage(f.read(), basename(attachment))
-                msg.attach(image)
+                if archive:
+                    att = MIMEBase('application', 'octet-stream')
+                    att.set_payload(f.read())
+                    encoders.encode_base64(att)
+                    att.add_header(
+                        'Content-Disposition',
+                        'attachment',
+                        filename=basename(attachment))
+                else:
+                    att = MIMEImage(f.read(), basename(attachment))
+                msg.attach(att)
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.ehlo()
         server.starttls()
         server.login(user, pwd)
         server.sendmail(user, to, msg.as_string())
         server.close()
-        print('successfully sent the mail')
+        logging.info('successfully sent the mail')
     except Exception as e:
-        print("failed to send mail: {}".format(str(e)))
+        # import traceback
+        # exc = traceback.format_exc()
+        # send_email(user, pwd, recipient, "failure", exc)
+        logging.error("failed to send mail: {}".format(str(e)))
 
 
 class Notifier():
@@ -68,7 +83,7 @@ class Notifier():
             elif line.startswith('token'):
                 config['token'] = self.extract_value(line)
         if not self.is_valid(config):
-            print(bad_config_message)
+            logging.error(bad_config_message)
         return config
 
     def send(self, subject, message=""):
@@ -95,3 +110,10 @@ class Notifier():
                 subject,
                 "token: {}".format(self.config['token']),
                 filenames)
+
+
+if __name__ == '__main__':
+    import getpass
+    user = input("user: ")
+    pwd = getpass.getpass('password:')
+    send_email(user, pwd, user, 'test', 'this is a test', ['screens.zip'])

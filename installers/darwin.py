@@ -33,7 +33,7 @@ def main():
     config_helper.create_config()
 
     tokens = {
-        "SUPER_SECRET_KEY": helper.get_encoded_secret(),
+        "SUPER_SECRET_KEY": config_helper.get_encoded_secret(),
         "HOME_DIRECTORY": parentdir
     }
     helper.prepare_file(snoopy_filename, tokens)

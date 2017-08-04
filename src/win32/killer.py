@@ -3,6 +3,7 @@
 import sys
 import zerorpc
 import traceback
+import logging
 
 
 class GracefulKiller:
@@ -15,7 +16,7 @@ class GracefulKiller:
         try:
             self.daemon.run()
         except KeyboardInterrupt as e:
-            print("Shutting down...")
+            logging.info("Shutting down...")
             self.notifier.send(subject="Shutting down...")
         except Exception as e:
             self.notifier.send(
@@ -27,6 +28,6 @@ class GracefulKiller:
     def exit(self):
         c = zerorpc.Client()
         c.connect("tcp://127.0.0.1:{}".format(self.port))
-        print('relaunching')
+        logging.info('relaunching')
         c.relaunch()
         sys.exit(0)
