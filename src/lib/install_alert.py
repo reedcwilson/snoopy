@@ -9,7 +9,7 @@ class InstallationEventHandler(PatternMatchingEventHandler):
         PatternMatchingEventHandler.__init__(
             self,
             patterns=["*"],
-            ignore_directories=True)
+            ignore_directories=False)
 
     def on_any_event(self, event):
         message = """The installation directory has been tampered with.

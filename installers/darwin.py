@@ -50,10 +50,10 @@ def main():
     # COMPILE RELOADER -- needs to happen before we install snoopy
     print("compiling reloader...")
     subprocess.check_output(['gcc', 'src/darwin/create_launchd.c'])
+    shutil.copy('a.out', 'src/a.out')
 
     # COMPILE PYTHON
     helper.compile(snoopy_spec_filename)
-    shutil.copy('a.out', 'src/a.out')
 
     # CLEANUP
     helper.replace_original(snoopy_filename)
