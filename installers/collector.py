@@ -31,7 +31,10 @@ def main():
     subprocess.check_output(['cp', 'installers/collector.sh', 'collector/'])
     subprocess.check_output(['cp', 'config/com.reedcwilson.collector.plist', 'collector/'])
     subprocess.check_output(['cp', '-r', 'dist', 'build', 'collector/'])
-    subprocess.check_output(['zip', 'collector.zip', 'collector/'])
+    os.chdir('collector/')
+    subprocess.check_output(['zip', '-r', 'collector.zip', '.'])
+    subprocess.check_output(['cp', 'collector.zip', '..'])
+    os.chdir('..')
     subprocess.check_output(['rm', '-rf', 'collector/', 'collector.sh', 'com.reedcwilson.collector.plist'])
     print("finished!")
 
