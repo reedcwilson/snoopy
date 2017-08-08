@@ -11,10 +11,13 @@ from apiclient import errors
 from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
+from lib.file_finder import get_embedded_filename
 
 try:
     import argparse
-    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
+    parser = argparse.ArgumentParser(parents=[tools.argparser])
+    parser.add_argument('--path')
+    flags = parser.parse_args()
 except ImportError:
     flags = None
 
@@ -25,7 +28,6 @@ CLIENT_SECRET_FILE = 'client_secret.json'
 APPLICATION_NAME = 'Snoopy Collector'
 
 user_id = 'me'
-store_dir = 'HOME_DIRECTORY/screenshots'
 
 
 def get_credentials():
@@ -39,7 +41,9 @@ def get_credentials():
     store = Storage(credential_path)
     credentials = store.get()
     if not credentials or credentials.invalid:
-        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
+        flow = client.flow_from_clientsecrets(
+            get_embedded_filename(CLIENT_SECRET_FILE),
+            SCOPES)
         flow.user_agent = APPLICATION_NAME
         if flags:
             credentials = tools.run_flow(flow, store, flags)
@@ -127,7 +131,7 @@ def delete_message(service, user_id, msg_id):
         print('An error occurred: {}'.format(error))
 
 
-def collect(should_delete=True):
+def collect(store_dir, should_delete=True):
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('gmail', 'v1', http=http)
@@ -145,7 +149,10 @@ def collect(should_delete=True):
 
 
 def main():
-    collect()
+    if not flags.path:
+        print("please provide a directory to store the images in")
+        return
+    collect(flags.path)
 
 
 if __name__ == '__main__':

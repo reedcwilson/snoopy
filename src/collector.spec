@@ -2,10 +2,15 @@
 
 block_cipher = None
 
+
+added_files = [
+  ('client_secret.json','.'),
+]
+
 a = Analysis(['collector.py'],
-             pathex=['HOME_DIRECTORY'],
+             pathex=['/Users/rwilson/code/snoopy/src'],
              binaries=[],
-             datas=[],
+             datas=added_files,
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
