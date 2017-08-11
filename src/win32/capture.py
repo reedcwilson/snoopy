@@ -1,7 +1,7 @@
 import time
 import os
 import zipfile
-from run_as import run_as_cur_user
+from win32.run_as import run_as_cur_user
 
 
 def create_archive(directory, filenames):
