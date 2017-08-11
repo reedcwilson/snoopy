@@ -2,7 +2,6 @@
 
 import os
 import base64
-import uuid
 import zipfile
 import httplib2
 
@@ -17,6 +16,7 @@ try:
     import argparse
     parser = argparse.ArgumentParser(parents=[tools.argparser])
     parser.add_argument('--path')
+    parser.add_argument('--token')
     flags = parser.parse_args()
 except ImportError:
     flags = None
@@ -54,13 +54,14 @@ def get_credentials():
     return credentials
 
 
-def unzip_files(zip_name, directory):
+def unzip_files(zip_name, directory, subject):
     zip_ref = zipfile.ZipFile(zip_name, 'r')
     num = 0
-    for filename in zip_ref.namelist():
+    for i, filename in enumerate(zip_ref.namelist()):
         if filename.endswith('.png'):
             part = zip_ref.read(filename)
-            with open('{}/{}.png'.format(directory, uuid.uuid4()), 'wb') as f:
+            png = '{}/{} - {}.png'.format(directory, subject, i)
+            with open(png, 'wb') as f:
                 f.write(part)
                 num += 1
     zip_ref.close()
@@ -68,11 +69,41 @@ def unzip_files(zip_name, directory):
     return num
 
 
+def get_body(message):
+    plain_part = list(filter(
+        lambda p: p['mimeType'] == 'text/plain',
+        message['payload']['parts']))[0]
+    return base64.b64decode(plain_part['body']['data']).decode()
+
+
+def get_header(message, key):
+    headers = list(filter(
+        lambda h: h['name'] == key,
+        message['payload']['headers']))
+    return headers[0]['value'] if len(headers) == 1 else None
+
+
+def write_alert(message, directory):
+    with open('{}/_ALERT.txt'.format(directory), 'a') as f:
+        f.write('{}\n'.format(message))
+
+
+def check_token(body):
+    return flags.token in body
+
+
 def download_attachments(service, user_id, msg_id, store_dir):
     num = 0
     try:
         message = service.users().messages().get(
             userId=user_id, id=msg_id).execute()
+        body = get_body(message)
+        subject = get_header(message, 'Subject')
+        if not check_token(body):
+            msg = 'message did not contain the installation token.\n'
+            msg += 'subject: {}\n'
+            msg += 'body: {}\n\n'
+            write_alert(msg.format(subject, body), store_dir)
         for part in message['payload']['parts']:
             if 'attachmentId' in part['body']:
                 data = None
@@ -89,7 +120,7 @@ def download_attachments(service, user_id, msg_id, store_dir):
                 path = '/'.join([store_dir, 'a.zip'])
                 with open(path, 'wb') as f:
                     f.write(file_data)
-                    num += unzip_files(path, store_dir)
+                    num += unzip_files(path, store_dir, subject)
     except errors.HttpError as error:
         print('An error occurred: {}'.format(error))
     return num
@@ -152,7 +183,8 @@ def main():
     if not flags.path:
         print("please provide a directory to store the images in")
         return
-    collect(flags.path)
+    # collect(flags.path)
+    collect(flags.path, False)
 
 
 if __name__ == '__main__':

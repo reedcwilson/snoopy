@@ -9,6 +9,8 @@
     <string>%INSTALL_DIR%/dist/collector/collector</string>
     <string>--path</string>
     <string>%INSTALL_DIR%/images</string>
+    <string>--token</string>
+    <string>%TOKEN%</string>
   </array>
 	<key>RunAtLoad</key>
 	<true/>
