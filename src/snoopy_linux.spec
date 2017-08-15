@@ -11,8 +11,8 @@ added_files = [
 ]
 
 a = Analysis(['snoopy_linux.py'],
-             #pathex=['HOME_DIRECTORY'],
-             pathex=['/home/parallels/code/snoopy/src'],
+             pathex=['HOME_DIRECTORY'],
+             #pathex=['/home/parallels/code/snoopy/src'],
              binaries=[],
              datas=added_files,
              hiddenimports=[],

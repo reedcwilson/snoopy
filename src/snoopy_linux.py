@@ -13,13 +13,11 @@ from lib.config_event_handler import ConfigFileEventHandler
 from lib.daemon import Daemon
 from lib.file_finder import get_embedded_filename
 
-# TODO: get from somewhere else
-user              = 'parallels'
-
-home              = os.getenv("HOME")
 
 directory         = 'HOME_DIRECTORY'
 secret_key        = 'SUPER_SECRET_KEY'
+user              = 'OPERATING_USER'
+# user              = 'parallels'
 
 # directory         = '/home/parallels/code/snoopy/'
 # secret_key        = 'cHdkCg=='
