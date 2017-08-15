@@ -4,11 +4,11 @@ import time
 import random
 import base64
 import sys
+import traceback
 from watchdog.observers import Observer
 from .install_alert import InstallationEventHandler
 from .secrets_manager import SecretsManager
 from .notifier import Notifier
-from .file_finder import get_embedded_filename
 
 
 class Daemon():
@@ -22,7 +22,7 @@ class Daemon():
         self.sleep_seconds = sys.maxsize
         self.catcher = catcher
         self.screenshots_directory = screenshots_directory
-        config_filename = get_embedded_filename(mail_config)
+        config_filename = mail_config
         secret_key_raw = base64.b64decode(secret_key).decode()
         mail_secrets_manager = SecretsManager(secret_key_raw, config_filename)
         self.notifier = Notifier(mail_secrets_manager)
@@ -49,7 +49,13 @@ class Daemon():
         while True:
             if self.should_execute():
                 # catchers needs to conform to the same interface
-                filenames = self.catcher.capture(self.screenshots_directory)
-                self.notifier.send_screenshots(filenames)
+                try:
+                    names = self.catcher.capture(self.screenshots_directory)
+                except Exception:
+                    self.notifier.send(
+                        'Alert!',
+                        'Unable to take screenshot: {}'.format(
+                            traceback.format_exc()))
+                self.notifier.send_screenshots(names)
             self.sleep_seconds = random.randint(120, 600)
             time.sleep(self.sleep_seconds)

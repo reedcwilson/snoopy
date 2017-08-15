@@ -28,7 +28,8 @@ class GracefulKiller:
         if pid == 0:
             subprocess.call([self.reloader])
         time.sleep(1)
-        if not self.install_is_happy():
-            self.notifier.send(
-                subject="Alert! Installation directory is unhealthy")
+        if pid != 0:
+            if not self.install_is_happy():
+                self.notifier.send(
+                    subject="Alert! Installation directory is unhealthy")
         sys.exit(0)

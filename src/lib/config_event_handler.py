@@ -4,14 +4,14 @@ from watchdog.events import PatternMatchingEventHandler
 
 
 class ConfigFileEventHandler(PatternMatchingEventHandler):
-    def __init__(self, notifier, config_dir, launchd_dir, plist_filename):
+    def __init__(self, notifier, config_dir, service_dir, config_filename):
         self.notifier = notifier
         self.config_dir = config_dir
-        self.launchd_dir = launchd_dir
-        self.plist_filename = plist_filename
+        self.service_dir = service_dir
+        self.config_filename = config_filename
         PatternMatchingEventHandler.__init__(
             self,
-            patterns=["*com.reedcwilson.snoopy.plist*"],
+            patterns=["*{}*".format(self.config_filename)],
             ignore_directories=True)
 
     def on_any_event(self, event):
@@ -23,10 +23,10 @@ class ConfigFileEventHandler(PatternMatchingEventHandler):
         config = ""
         local_config_file = '{}/{}'.format(
             self.config_dir,
-            self.plist_filename)
+            self.config_filename)
         runtime_config_file = '{}/{}'.format(
-            self.launchd_dir,
-            self.plist_filename)
+            self.service_dir,
+            self.config_filename)
         with open(local_config_file, 'r') as f:
             config = f.read().replace("%INSTALL_DIR%", self.config_dir)
         with open(runtime_config_file, 'w') as f:

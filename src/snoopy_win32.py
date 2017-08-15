@@ -1,4 +1,5 @@
 from lib.daemon import Daemon
+from lib.file_finder import get_embedded_filename
 from win32.killer import GracefulKiller
 from win32.service_reloader import ServiceReloader
 from win32 import capture as catcher
@@ -17,7 +18,7 @@ class MyDaemon(Daemon):
     def __init__(self):
         Daemon.__init__(
             self,
-            mail_config,
+            get_embedded_filename(mail_config),
             secret_key,
             installation_path,
             directory,

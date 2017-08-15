@@ -4,12 +4,9 @@ import os
 import Quartz
 from lib.file_finder import get_embedded_filename
 from lib.daemon import Daemon
+from lib.config_event_handler import ConfigFileEventHandler
 from darwin.killer import GracefulKiller
-from darwin.config_event_handler import ConfigFileEventHandler
 from darwin import capture as catcher
-
-# NOTE: the Quartz module is part of the pyobjc install
-# pip install pyobjc
 
 home              = os.getenv("HOME")
 directory         = 'HOME_DIRECTORY'
@@ -38,7 +35,7 @@ class MyDaemon(Daemon):
     def __init__(self):
         Daemon.__init__(
             self,
-            mail_config,
+            get_embedded_filename(mail_config),
             secret_key,
             installation_path,
             directory,
