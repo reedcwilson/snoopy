@@ -212,8 +212,8 @@ def main():
     trash_dir = '{}/_trash'.format(flags.path)
     remove_trash(trash_dir)
     ensure_directory(trash_dir, True)
-    # collect(flags.path)
-    collect(flags.path, False)
+    collect(flags.path)
+    # collect(flags.path, False)
 
 
 if __name__ == '__main__':
