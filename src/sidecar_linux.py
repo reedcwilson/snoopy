@@ -37,7 +37,7 @@ def create_reloader():
         # '/home/parallels/code/snoopy/start.sh',
         get_embedded_filename(service),
         # '/home/parallels/code/snoopy/config/snoopy.service',
-        7110
+        7111
     )
 
 
@@ -47,7 +47,7 @@ def main():
     t.start()
     GracefulKiller(
         Notifier(),
-        7111)
+        7110)
     while True:
         time.sleep(10)
 

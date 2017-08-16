@@ -17,7 +17,6 @@ directory         = 'HOME_DIRECTORY'
 secret_key        = 'SUPER_SECRET_KEY'
 user              = 'OPERATING_USER'
 # user              = 'parallels'
-
 # directory         = '/home/parallels/code/snoopy/'
 # secret_key        = 'cHdkCg=='
 
@@ -59,7 +58,6 @@ class MyDaemon(Daemon):
         GracefulKiller(
             self.notifier,
             7111)
-
         config_event_handler = ConfigFileEventHandler(
             self.notifier,
             config_dir,
