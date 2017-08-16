@@ -18,8 +18,6 @@ snoopy_systemd_file   = 'config/snoopy.service'
 sidecar_systemd_file  = 'config/sidecar.service'
 snoopy_systemd_name   = 'snoopy.service'
 sidecar_systemd_name  = 'sidecar.service'
-config_dir            = '{}/config'.format(parentdir)
-launchd_path          = '/lib/systemd/system/'
 start                 = 'src/linux/start.sh'
 
 
