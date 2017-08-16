@@ -9,8 +9,8 @@ Restart=always
 RestartSec=3
 Environment="XAUTHORITY=/home/parallels/.Xauthority"
 Environment="DISPLAY=:0"
-#ExecStart=%INSTALL_DIR%/dist/sidecar/sidecar
-ExecStart=/home/parallels/.pyenv/shims/python /home/parallels/code/snoopy/src/sidecar_linux.py
+ExecStart=%INSTALL_DIR%/dist/sidecar/sidecar
+#ExecStart=/home/parallels/.pyenv/shims/python /home/parallels/code/snoopy/src/sidecar_linux.py
 
 [Install]
 WantedBy=default.target
