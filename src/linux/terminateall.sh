@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
-./stop.sh snoopy.service &
-./stop.sh sidecar.service &
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+${DIR}/stop.sh snoopy.service &
+${DIR}/stop.sh sidecar.service &
