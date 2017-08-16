@@ -4,6 +4,7 @@ block_cipher = None
 
 
 added_files = [
+  ('linux/start.sh','.'),
   ('../config/sidecar.service','.'),
   ('../config/snoopy.service','.'),
 ]

@@ -26,11 +26,37 @@ config_dir        = '{}/config'.format(directory)
 installation_path = '{}/dist'.format(directory)
 
 mail_config       = 'mail.config'
-reloader          = 'start.sh'
+reloader_script   = 'start.sh'
 service           = 'sidecar.service'
 # mail_config       = '{}/mail.config'.format(directory)
-# reloader          = '{}/start.sh'.format(directory)
+# reloader_script   = '{}/start.sh'.format(directory)
 # service           = '{}/sidecar.service'.format(config_dir)
+
+
+def debug(msg):
+    with open('/home/parallels/code/snoopy/snoopy.out', 'a') as f:
+        f.write('{}\n'.format(msg))
+
+
+def create_reloader(notifier):
+    debug('initializing reloader')
+
+    def reloader():
+        debug('creating reloader')
+        try:
+            ServiceReloader(
+                service,
+                get_embedded_filename(reloader_script),
+                # '/home/parallels/code/snoopy/start.sh',
+                get_embedded_filename(service),
+                # service,
+                7110,
+                notifier
+            )
+        except Exception:
+            import traceback
+            debug(traceback.format_exc())
+    return reloader
 
 
 class MyDaemon(Daemon):
@@ -54,6 +80,10 @@ class MyDaemon(Daemon):
                     traceback.format_exc()))
 
     def setup(self):
+        reloader = create_reloader(self.notifier)
+        t = threading.Thread(target=reloader)
+        t.daemon = True
+        t.start()
         # the graceful killer registers events on init
         GracefulKiller(
             self.notifier,
@@ -70,20 +100,6 @@ class MyDaemon(Daemon):
         Enforcer(user, self.notifier).run_async()
 
 
-def create_reloader():
-    ServiceReloader(
-        service,
-        get_embedded_filename(reloader),
-        # '/home/parallels/code/snoopy/start.sh',
-        get_embedded_filename(service),
-        # service,
-        7110
-    )
-
-
 if __name__ == '__main__':
-    t = threading.Thread(target=create_reloader)
-    t.daemon = True
-    t.start()
     daemon = MyDaemon()
     daemon.run()

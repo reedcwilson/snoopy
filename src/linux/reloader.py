@@ -7,10 +7,11 @@ import subprocess
 
 
 class ServiceReloader(object):
-    def __init__(self, name, reloader, service_file, port):
+    def __init__(self, name, reloader, service_file, port, notifier):
         self.name = name
         self.reloader = reloader
         self.service_file = service_file
+        self.notifier = notifier
         server = zerorpc.Server(self)
         server.bind('tcp://127.0.0.1:{}'.format(port))
         server.run()
@@ -54,6 +55,8 @@ class ServiceReloader(object):
         time.sleep(2)
         status = self.get_status()
         if not status:
+            msg = 'service is unloaded - attempting to load'
+            self.notifier.send('Alert!', msg)
             self.load()
 
     def relaunch(self):
