@@ -4,6 +4,7 @@ import os
 import base64
 import zipfile
 import httplib2
+import shutil
 
 from apiclient import discovery
 from apiclient import errors
@@ -54,13 +55,28 @@ def get_credentials():
     return credentials
 
 
+def get_path_parts(subject):
+    colon = subject.index(':')
+    return subject[:colon], subject[colon + 2:]
+
+
+def ensure_directory(name, is_dir=False):
+    if is_dir:
+        os.makedirs(name)
+    else:
+        if not os.path.exists(os.path.dirname(name)):
+            os.makedirs(os.path.dirname(name))
+
+
 def unzip_files(zip_name, directory, subject):
     zip_ref = zipfile.ZipFile(zip_name, 'r')
     num = 0
     for i, filename in enumerate(zip_ref.namelist()):
         if filename.endswith('.png'):
             part = zip_ref.read(filename)
-            png = '{}/{} - {}.png'.format(directory, subject, i)
+            device, title = get_path_parts(subject)
+            png = '{}/{}/{} - {}.png'.format(directory, device, title, i)
+            ensure_directory(png)
             with open(png, 'wb') as f:
                 f.write(part)
                 num += 1
@@ -83,9 +99,14 @@ def get_header(message, key):
     return headers[0]['value'] if len(headers) == 1 else None
 
 
-def write_alert(message, directory):
-    with open('{}/_ALERT.txt'.format(directory), 'a') as f:
+def log(subject, message, directory, device):
+    filename = '{}/{}/_log.txt'.format(directory, device)
+    ensure_directory(filename)
+    with open(filename, 'a') as f:
+        f.write('==============================\n')
+        f.write('{}\n\n'.format(subject))
         f.write('{}\n'.format(message))
+        f.write('==============================\n\n\n')
 
 
 def check_token(body):
@@ -99,11 +120,12 @@ def download_attachments(service, user_id, msg_id, store_dir):
             userId=user_id, id=msg_id).execute()
         body = get_body(message)
         subject = get_header(message, 'Subject')
+        device, remainder = get_path_parts(subject)
         if not check_token(body):
-            msg = 'message did not contain the installation token.\n'
-            msg += 'subject: {}\n'
-            msg += 'body: {}\n\n'
-            write_alert(msg.format(subject, body), store_dir)
+            msg = 'ALERT! NO INSTALLATION TOKEN.\n'
+            msg += 'body: {}'
+            body = msg.format(body)
+        log(remainder, body, store_dir, device)
         for part in message['payload']['parts']:
             if 'attachmentId' in part['body']:
                 data = None
@@ -179,10 +201,17 @@ def collect(store_dir, should_delete=True):
     print('downloaded {} attachments'.format(num))
 
 
+def remove_trash(trash_dir):
+    shutil.rmtree(trash_dir, ignore_errors=True)
+
+
 def main():
     if not flags.path:
         print("please provide a directory to store the images in")
         return
+    trash_dir = '{}/_trash'.format(flags.path)
+    remove_trash(trash_dir)
+    ensure_directory(trash_dir, True)
     # collect(flags.path)
     collect(flags.path, False)
 
