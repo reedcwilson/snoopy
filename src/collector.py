@@ -5,6 +5,7 @@ import base64
 import zipfile
 import httplib2
 import shutil
+import datetime
 
 from apiclient import discovery
 from apiclient import errors
@@ -69,18 +70,17 @@ def ensure_directory(name, is_dir=False):
 
 
 def unzip_files(zip_name, directory, subject):
-    zip_ref = zipfile.ZipFile(zip_name, 'r')
-    num = 0
-    for i, filename in enumerate(zip_ref.namelist()):
-        if filename.endswith('.png'):
-            part = zip_ref.read(filename)
-            device, title = get_path_parts(subject)
-            png = '{}/{}/{} - {}.png'.format(directory, device, title, i)
-            ensure_directory(png)
-            with open(png, 'wb') as f:
-                f.write(part)
-                num += 1
-    zip_ref.close()
+    with zipfile.ZipFile(zip_name, 'a+') as f:
+        num = 0
+        for i, filename in enumerate(f.namelist()):
+            if filename.endswith('.png'):
+                part = f.read(filename)
+                device, title = get_path_parts(subject)
+                png = '{}/{}/{} - {}.png'.format(directory, device, title, i)
+                ensure_directory(png)
+                with open(png, 'wb') as f:
+                    f.write(part)
+                    num += 1
     os.remove(zip_name)
     return num
 
@@ -198,7 +198,8 @@ def collect(store_dir, should_delete=True):
         num += download_attachments(service, user_id, msg_id, store_dir)
         if should_delete:
             delete_message(service, user_id, msg_id)
-    print('downloaded {} attachments'.format(num))
+    time = str(datetime.datetime.now())
+    print('{}: downloaded {} attachments'.format(time, num))
 
 
 def remove_trash(trash_dir):
