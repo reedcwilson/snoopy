@@ -70,11 +70,11 @@ def ensure_directory(name, is_dir=False):
 
 
 def unzip_files(zip_name, directory, subject):
-    with zipfile.ZipFile(zip_name, 'a+') as f:
+    with zipfile.ZipFile(zip_name, 'r') as zip_ref:
         num = 0
-        for i, filename in enumerate(f.namelist()):
+        for i, filename in enumerate(zip_ref.namelist()):
             if filename.endswith('.png'):
-                part = f.read(filename)
+                part = zip_ref.read(filename)
                 device, title = get_path_parts(subject)
                 png = '{}/{}/{} - {}.png'.format(directory, device, title, i)
                 ensure_directory(png)
