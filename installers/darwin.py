@@ -42,7 +42,7 @@ def main():
         "HOME_DIRECTORY": parentdir
     }
     helper.prepare_file(snoopy_filename, tokens)
-    tokens = {"HOME_DIRECTORY": parentdir}
+    tokens = {"HOME_DIRECTORY": '{}/src'.format(parentdir)}
     helper.prepare_file(snoopy_spec_filename, tokens)
 
     # INSTALL PYTHON DEPENDENCIES
