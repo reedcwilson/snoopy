@@ -5,13 +5,13 @@ from win32.service_reloader import ServiceReloader
 from win32 import capture as catcher
 import threading
 
-directory         = 'C:\\Users\\Reed\\code\\snoopy'
+directory         = 'HOME_DIRECTORY'
 snoopy_path       = r'{}\dist\snoopy'.format(directory)
 sidecar_path      = r'{}\dist\sidecar'.format(directory)
 installation_path = r'{}\dist'.format(directory)
-secret_key        = 'cHdk'
+secret_key        = 'SUPER_SECRET_KEY'
 mail_config       = 'mail.config'
-service           = 'sidecar'
+service           = 'sidecar_win32'
 
 
 class MyDaemon(Daemon):
