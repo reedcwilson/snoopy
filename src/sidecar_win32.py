@@ -1,9 +1,9 @@
-from service_reloader import ServiceReloader
-from killer import GracefulKiller
+from win32.service_reloader import ServiceReloader
+from win32.killer import GracefulKiller
 import threading
 import time
 
-directory         = 'HOME_DIRECTORY'
+directory         = 'C:\\Users\\Reed\\code\\snoopy'
 installation_path = r'{}\dist\snoopy'.format(directory)
 service           = 'snoopy'
 

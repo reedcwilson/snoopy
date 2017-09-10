@@ -10,9 +10,9 @@ from config_helper import ConfigHelper
 _directory            = os.path.dirname(os.path.abspath(__file__))
 parentdir             = os.path.dirname(_directory)
 snoopy_filename       = r'src\snoopy_win32.py'
-sidecar_filename      = r'src\win32\sidecar.py'
+sidecar_filename      = r'src\sidecar_win32.py'
 snoopy_spec_filename  = r'src\snoopy_win32.spec'
-sidecar_spec_filename = r'src\win32\sidecar.spec'
+sidecar_spec_filename = r'src\sidecar_win32.spec'
 nssm_file             = r'{}\src\win32\nssm.exe'.format(parentdir)
 snoopy                = r'{}\dist\snoopy\snoopy.exe'.format(parentdir)
 sidecar               = r'{}\dist\sidecar\sidecar.exe'.format(parentdir)
@@ -80,7 +80,7 @@ def main():
     tokens = {"HOME_DIRECTORY": r'{}\src'.format(home_directory)}
     helper.prepare_file(snoopy_spec_filename, tokens)
 
-    tokens = {"HOME_DIRECTORY": r'{}\win32\src'.format(home_directory)}
+    tokens = {"HOME_DIRECTORY": r'{}\src'.format(home_directory)}
     helper.prepare_file(sidecar_spec_filename, tokens)
 
     # INSTALL PYTHON DEPENDENCIES

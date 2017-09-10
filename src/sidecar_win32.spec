@@ -3,8 +3,8 @@
 block_cipher = None
 
 
-sidecar = Analysis(['sidecar.py'],
-             pathex=['c:\\Users\\rwilson\\code\\snoopy\\src\\win32'],
+sidecar = Analysis(['sidecar_win32.py'],
+             pathex=['HOME_DIRECTORY'],
              binaries=[],
              datas=[],
              hiddenimports=[],
