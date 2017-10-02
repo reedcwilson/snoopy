@@ -72,34 +72,38 @@ def ensure_directory(name, is_dir=False):
 def fix_bad_zip_file(zipFile):
     with open(zipFile, 'r+b') as f:
         data = f.read()
-        pos = data.rfind('\x50\x4b\x05\x06')  # End of central directory
+        pos = data.rfind(b'\x50\x4b\x05\x06')  # End of central directory
         if (pos > 0):
             f.seek(pos + 20)  # size of 'ZIP end of central directory record'
             f.truncate()
-            f.write('\x00\x00')
+            f.write(b'\x00\x00')
 
 
 def open_zip(zip_name):
     try:
         return zipfile.ZipFile(zip_name, 'r')
     except zipfile.BadZipFile:
-        fix_bad_zip_file(zip_name)
-        return zipfile.ZipFile(zip_name, 'r')
+        try:
+            fix_bad_zip_file(zip_name)
+            return zipfile.ZipFile(zip_name, 'r')
+        except Exception as e:
+            return None
 
 
 def unzip_files(zip_name, directory, subject):
     num = 0
     try:
         with open_zip(zip_name) as zip_ref:
-            for i, filename in enumerate(zip_ref.namelist()):
-                if filename.endswith('.png'):
-                    part = zip_ref.read(filename)
-                    dev, name = get_path_parts(subject)
-                    png = '{}/{}/{} - {}.png'.format(directory, dev, name, i)
-                    ensure_directory(png)
-                    with open(png, 'wb') as f:
-                        f.write(part)
-                        num += 1
+            if zip_ref:
+                for i, filename in enumerate(zip_ref.namelist()):
+                    if filename.endswith('.png'):
+                        part = zip_ref.read(filename)
+                        dev, name = get_path_parts(subject)
+                        png = '{}/{}/{} - {}.png'.format(directory, dev, name, i)
+                        ensure_directory(png)
+                        with open(png, 'wb') as f:
+                            f.write(part)
+                            num += 1
     except zipfile.BadZipFile:
         pass
     os.remove(zip_name)
