@@ -4,6 +4,8 @@ import time
 import random
 import base64
 import sys
+import os
+import uuid
 import traceback
 from watchdog.observers import Observer
 from .install_alert import InstallationEventHandler
@@ -33,6 +35,9 @@ class Daemon():
             installation_path,
             recursive=True)
         self.notifier.send(subject="Starting up")
+        self.likelihood = .5  # 50% chance
+        self.max_images = 15  # don't keep too many images
+        self.images_dir = 'captured_images'
 
     def should_execute(self):
         return True
@@ -42,6 +47,20 @@ class Daemon():
 
     def setup(self):
         print("perform setup functionality in your subclass")
+
+    def store_images(self, filenames):
+        if not os.path.exists(self.images_dir):
+            os.makedirs(self.images_dir)
+        for filename in filenames:
+            new_filename = "{}-{}".format(uuid.uuid4(), filename)
+            os.rename(filename, os.path.join(self.images_dir, new_filename))
+        return len(os.listdir()) > self.max_images
+
+    def send(self):
+        filenames = os.listdir(self.images_dir)
+        self.notifier.send_screenshots(filenames)
+        for filename in filenames:
+            os.remove(filename)
 
     def run(self):
         self.setup()
@@ -56,6 +75,9 @@ class Daemon():
                         'Alert!',
                         'Unable to take screenshot: {}'.format(
                             traceback.format_exc()))
-                self.notifier.send_screenshots(names)
-            self.sleep_seconds = random.randint(120, 600)
+                # limit # of emails by holding onto screenshots
+                should_send = self.store_images(names)
+                if should_send or random.random() < self.likelihood:
+                    self.send()
+            self.sleep_seconds = random.randint(120, 1080)  # 2-18 min
             time.sleep(self.sleep_seconds)
