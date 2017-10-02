@@ -83,27 +83,23 @@ def open_zip(zip_name):
     try:
         return zipfile.ZipFile(zip_name, 'r')
     except zipfile.BadZipFile:
-        try:
-            fix_bad_zip_file(zip_name)
-            return zipfile.ZipFile(zip_name, 'r')
-        except Exception as e:
-            return None
+        fix_bad_zip_file(zip_name)
+        return zipfile.ZipFile(zip_name, 'r')
 
 
 def unzip_files(zip_name, directory, subject):
     num = 0
     try:
         with open_zip(zip_name) as zip_ref:
-            if zip_ref:
-                for i, filename in enumerate(zip_ref.namelist()):
-                    if filename.endswith('.png'):
-                        part = zip_ref.read(filename)
-                        dev, name = get_path_parts(subject)
-                        png = '{}/{}/{} - {}.png'.format(directory, dev, name, i)
-                        ensure_directory(png)
-                        with open(png, 'wb') as f:
-                            f.write(part)
-                            num += 1
+            for i, filename in enumerate(zip_ref.namelist()):
+                if filename.endswith('.png'):
+                    part = zip_ref.read(filename)
+                    dev, name = get_path_parts(subject)
+                    png = '{}/{}/{} - {}.png'.format(directory, dev, name, i)
+                    ensure_directory(png)
+                    with open(png, 'wb') as f:
+                        f.write(part)
+                        num += 1
     except zipfile.BadZipFile:
         pass
     os.remove(zip_name)
