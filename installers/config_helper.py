@@ -32,6 +32,10 @@ def load_inputs(filename):
             config['device'] = extract_value(line)
         elif line.startswith('token'):
             config['token'] = extract_value(line)
+        elif line.startswith('api_token'):
+            config['api_token'] = extract_value(line)
+        elif line.startswith('domain'):
+            config['domain'] = extract_value(line)
     return config
 
 
@@ -51,11 +55,10 @@ class ConfigHelper:
         if len(sys.argv) > 1:
             inputs = load_inputs(sys.argv[1])
         else:
-            # accept username, password, recipient, device, token
-            inputs['user'] = input("gmail username: ")
-            inputs['pwd'] = getpass.getpass("gmail password: ")
-            inputs['recipient'] = input("recipient of emails: ")
             inputs['device'] = input("name of device: ")
+            inputs['recipient'] = input("recipient of emails: ")
+            inputs['domain'] = input("mailgun domain: ")
+            inputs['api_token'] = getpass.getpass("mailgun api token: ")
             inputs['token'] = getpass.getpass("secure token: ")
 
         # create config

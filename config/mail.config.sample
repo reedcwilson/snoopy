@@ -1,5 +1,5 @@
-user:      from@gmail.com
-pwd:       password
+domain:    yourdomain.com
+api_key:   your_mailgun_key
 recipient: to@gmail.com
 device:    device name
 token:     untouched

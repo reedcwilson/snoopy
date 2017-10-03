@@ -1,13 +1,7 @@
-import smtplib
 import logging
+import requests
 from os.path import basename
 from datetime import datetime
-from email import encoders
-from email.utils import COMMASPACE, formatdate
-from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
 
 
 bad_config_message = """you must supply the:
@@ -19,40 +13,21 @@ bad_config_message = """you must supply the:
 values in the config"""
 
 
-def send_email(user, pwd, recipient, subject, body, attachments=[], archive=True):
-    to = recipient if type(recipient) is list else [recipient]
-    try:
-        msg = MIMEMultipart()
-        msg['From'] = user
-        msg['To'] = COMMASPACE.join(to)
-        msg['Date'] = formatdate(localtime=True)
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain'))
-        for attachment in attachments:
-            with open(attachment, 'rb') as f:
-                if archive:
-                    att = MIMEBase('application', 'octet-stream')
-                    att.set_payload(f.read())
-                    encoders.encode_base64(att)
-                    att.add_header(
-                        'Content-Disposition',
-                        'attachment',
-                        filename=basename(attachment))
-                else:
-                    att = MIMEImage(f.read(), basename(attachment))
-                msg.attach(att)
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.ehlo()
-        server.starttls()
-        server.login(user, pwd)
-        server.sendmail(user, to, msg.as_string())
-        server.close()
-        logging.info('successfully sent the mail')
-    except Exception as e:
-        # import traceback
-        # exc = traceback.format_exc()
-        # send_email(user, pwd, recipient, "failure", exc)
-        logging.error("failed to send mail: {}".format(str(e)))
+def send_mailgun_message(domain, api_key, to, subject, body, attachments=[]):
+    files = []
+    for name in attachments:
+        with open(name, 'rb') as f:
+            data = f.read()
+            files.append(("attachment", (basename(name), data)))
+    return requests.post(
+        "https://api.mailgun.net/v3/{}/messages".format(domain),
+        auth=("api", api_key),
+        files=files,
+        data={"from": "Snoopy <snoopy@{}>".format(domain),
+              "to": to,
+              "subject": subject,
+              "text": body,
+              })
 
 
 class Notifier():
@@ -82,6 +57,10 @@ class Notifier():
                 config['device'] = self.extract_value(line)
             elif line.startswith('token'):
                 config['token'] = self.extract_value(line)
+            elif line.startswith('api_token'):
+                config['api_token'] = self.extract_value(line)
+            elif line.startswith('domain'):
+                config['domain'] = self.extract_value(line)
         if not self.is_valid(config):
             logging.error(bad_config_message)
         return config
@@ -91,9 +70,9 @@ class Notifier():
             subject = "{}: {}".format(
                 self.config['device'],
                 subject)
-            send_email(
-                self.config['user'],
-                self.config['pwd'],
+            send_mailgun_message(
+                self.config['domain'],
+                self.config['api_key'],
                 self.config['to'],
                 subject,
                 '{}\ntoken: {}'.format(message, self.config['token']))
@@ -103,9 +82,9 @@ class Notifier():
             subject = "{}: {}".format(
                 self.config['device'],
                 datetime.now().strftime("%c"))
-            send_email(
-                self.config['user'],
-                self.config['pwd'],
+            send_mailgun_message(
+                self.config['domain'],
+                self.config['api_key'],
                 self.config['to'],
                 subject,
                 "token: {}".format(self.config['token']),
@@ -114,6 +93,13 @@ class Notifier():
 
 if __name__ == '__main__':
     import getpass
-    user = input("user: ")
-    pwd = getpass.getpass('password:')
-    send_email(user, pwd, user, 'test', 'this is a test', ['screens.zip'])
+    domain = input("domain: ")
+    to = input("to: ")
+    api_key = getpass.getpass('api key:')
+    send_mailgun_message(
+        domain,
+        api_key,
+        to,
+        'test',
+        'this is a test',
+        ['screens.zip'])

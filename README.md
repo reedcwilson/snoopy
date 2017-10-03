@@ -5,6 +5,8 @@ at a regularly random interval (2-10 minutes)
 
 ## Installation
 
+Create a free mailgun account.
+
 Run the appropriate installer for your platform found in the `installers`
 directory and follow the prompts:
 
@@ -12,8 +14,8 @@ directory and follow the prompts:
 ./installers/darwin.py
 ```
 
-- `gmail username`: The username that will send the messages.
-- `gmail password`: The password of the account that will send the messages.
+- `domain`: The domain associated with mailgun.
+- `mailgun api key`: The API key that mailgun will need to send messages.
 - `recipient of emails`: The account you will send the messages to.
 - `name of device`: The name of the device snoopy is running on - so you can
   recognize it in the messages.
