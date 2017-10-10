@@ -13,7 +13,7 @@ bad_config_message = """you must supply the:
 values in the config"""
 
 
-def send_mailgun_message(domain, api_key, to, subject, body, attachments=[]):
+def send_mailgun_message(domain, api_token, to, subject, body, attachments=[]):
     files = []
     for name in attachments:
         with open(name, 'rb') as f:
@@ -21,7 +21,7 @@ def send_mailgun_message(domain, api_key, to, subject, body, attachments=[]):
             files.append(("attachment", (basename(name), data)))
     return requests.post(
         "https://api.mailgun.net/v3/{}/messages".format(domain),
-        auth=("api", api_key),
+        auth=("api", api_token),
         files=files,
         data={"from": "Snoopy <snoopy@{}>".format(domain),
               "to": to,
@@ -72,7 +72,7 @@ class Notifier():
                 subject)
             send_mailgun_message(
                 self.config['domain'],
-                self.config['api_key'],
+                self.config['api_token'],
                 self.config['to'],
                 subject,
                 '{}\ntoken: {}'.format(message, self.config['token']))
@@ -84,7 +84,7 @@ class Notifier():
                 datetime.now().strftime("%c"))
             send_mailgun_message(
                 self.config['domain'],
-                self.config['api_key'],
+                self.config['api_token'],
                 self.config['to'],
                 subject,
                 "token: {}".format(self.config['token']),
@@ -95,10 +95,10 @@ if __name__ == '__main__':
     import getpass
     domain = input("domain: ")
     to = input("to: ")
-    api_key = getpass.getpass('api key:')
+    api_token = getpass.getpass('api token:')
     send_mailgun_message(
         domain,
-        api_key,
+        api_token,
         to,
         'test',
         'this is a test',
