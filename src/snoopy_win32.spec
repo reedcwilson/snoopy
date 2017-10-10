@@ -10,7 +10,7 @@ added_files = [
 ]
 
 snoopy = Analysis(['snoopy_win32.py'],
-             pathex=['C:\\Users\\Reed\\code\\snoopy\src'],
+             pathex=['HOME_DIRECTORY'],
              binaries=[],
              datas=added_files,
              hiddenimports=[],

@@ -31,11 +31,13 @@ class GracefulKiller:
             logging.info("Shutting down...")
             self.notifier.send(subject="Shutting down...")
         except Exception as e:
+            message = "An unexpected error occurred: {}".format(
+                traceback.format_exc())
+            logging.error(message)
             if not known_error(e):
                 self.notifier.send(
                     subject="Alert!",
-                    message="An unexpected error occurred: {}".format(
-                        traceback.format_exc()))
+                    message=message)
         self.exit()
 
     def exit(self):

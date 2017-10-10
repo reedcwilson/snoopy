@@ -21,6 +21,7 @@ class Daemon():
             installation_path,
             screenshots_directory,
             catcher):
+        print(installation_path)
         self.sleep_seconds = sys.maxsize
         self.catcher = catcher
         self.screenshots_directory = screenshots_directory
@@ -67,6 +68,7 @@ class Daemon():
         self.observer.start()
         while True:
             if self.should_execute():
+                names = []
                 # catchers needs to conform to the same interface
                 try:
                     names = self.catcher.capture(self.screenshots_directory)
