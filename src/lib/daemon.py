@@ -5,6 +5,7 @@ import random
 import base64
 import sys
 import os
+from os.path import join, basename, dirname
 import uuid
 import traceback
 from watchdog.observers import Observer
@@ -21,7 +22,6 @@ class Daemon():
             installation_path,
             screenshots_directory,
             catcher):
-        print(installation_path)
         self.sleep_seconds = sys.maxsize
         self.catcher = catcher
         self.screenshots_directory = screenshots_directory
@@ -38,7 +38,7 @@ class Daemon():
         self.notifier.send(subject="Starting up")
         self.likelihood = .5  # 50% chance
         self.max_images = 15  # don't keep too many images
-        self.images_dir = 'captured_images'
+        self.images_dir = join(self.screenshots_directory, 'captured_images')
 
     def should_execute(self):
         return True
@@ -53,15 +53,20 @@ class Daemon():
         if not os.path.exists(self.images_dir):
             os.makedirs(self.images_dir)
         for filename in filenames:
-            new_filename = "{}-{}".format(uuid.uuid4(), filename)
-            os.rename(filename, os.path.join(self.images_dir, new_filename))
+            new_filename = "{}-{}".format(uuid.uuid4(), basename(filename))
+            full_name = join(dirname(filename), new_filename)
+            os.rename(filename, join(self.images_dir, new_filename))
         return len(os.listdir()) > self.max_images
 
     def send(self):
-        filenames = os.listdir(self.images_dir)
+        filenames = [join(self.images_dir, n) for n in os.listdir(self.images_dir)]
         self.notifier.send_screenshots(filenames)
         for filename in filenames:
             os.remove(filename)
+            
+    def sleep(self):
+        self.sleep_seconds = random.randint(120, 1080)  # 2-18 min
+        time.sleep(self.sleep_seconds)
 
     def run(self):
         self.setup()
@@ -69,17 +74,18 @@ class Daemon():
         while True:
             if self.should_execute():
                 names = []
-                # catchers needs to conform to the same interface
                 try:
+                    # catchers needs to conform to the same interface
                     names = self.catcher.capture(self.screenshots_directory)
                 except Exception:
                     self.notifier.send(
                         'Alert!',
                         'Unable to take screenshot: {}'.format(
                             traceback.format_exc()))
+                    self.sleep()
+                    continue
                 # limit # of emails by holding onto screenshots
                 should_send = self.store_images(names)
                 if should_send or random.random() < self.likelihood:
                     self.send()
-            self.sleep_seconds = random.randint(120, 1080)  # 2-18 min
-            time.sleep(self.sleep_seconds)
+                self.sleep()

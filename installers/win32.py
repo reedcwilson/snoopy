@@ -8,14 +8,14 @@ from config_helper import ConfigHelper
 
 # NOTE: this script must be run from the root directory of the repository
 _directory            = os.path.dirname(os.path.abspath(__file__))
-parentdir             = os.path.dirname(_directory)
+rootdir               = os.path.dirname(_directory)
 snoopy_filename       = r'src\snoopy_win32.py'
 sidecar_filename      = r'src\sidecar_win32.py'
 snoopy_spec_filename  = r'src\snoopy_win32.spec'
 sidecar_spec_filename = r'src\sidecar_win32.spec'
-nssm_file             = r'{}\src\win32\nssm.exe'.format(parentdir)
-snoopy                = r'{}\dist\snoopy\snoopy.exe'.format(parentdir)
-sidecar               = r'{}\dist\sidecar\sidecar.exe'.format(parentdir)
+nssm_file             = r'{}\src\win32\nssm.exe'.format(rootdir)
+snoopy                = r'{}\dist\snoopy\snoopy.exe'.format(rootdir)
+sidecar               = r'{}\dist\sidecar\sidecar.exe'.format(rootdir)
 snoopy_service        = 'snoopy'
 sidecar_service       = 'sidecar'
 
@@ -36,9 +36,9 @@ def install(serv, exe):
         exe
     ])
     nssm(['set', serv, 'AppStopMethodSkip', '6'])
-    nssm(['set', serv, 'AppDirectory', '{}'.format(parentdir)])
-    nssm(['set', serv, 'AppStdout', r'{}\{}.out'.format(parentdir, serv)])
-    nssm(['set', serv, 'AppStderr', r'{}\{}.err'.format(parentdir, serv)])
+    nssm(['set', serv, 'AppDirectory', '{}'.format(rootdir)])
+    nssm(['set', serv, 'AppStdout', r'{}\{}.out'.format(rootdir, serv)])
+    nssm(['set', serv, 'AppStderr', r'{}\{}.err'.format(rootdir, serv)])
 
 
 def start(serv):
@@ -57,7 +57,7 @@ def cleanup(serv):
 def main():
     cleanup(snoopy_service)
     cleanup(sidecar_service)
-    home_directory = parentdir.replace('\\', '\\\\')
+    home_directory = rootdir.replace('\\', '\\\\')
 
     helper = Helper()
     config_helper = ConfigHelper()
