@@ -65,6 +65,12 @@ class Notifier():
             logging.error(bad_config_message)
         return config
 
+    def get_token(self):
+        token = self.config['token']
+        now = str(datetime.now())
+        blob = self.secrets_manager.encrypt('{} - {}'.format(token, now))
+        return blob
+
     def send(self, subject, message=""):
         if self.is_valid(self.config):
             subject = "{}: {}".format(
@@ -75,7 +81,7 @@ class Notifier():
                 self.config['api_token'],
                 self.config['to'],
                 subject,
-                '{}\ntoken: {}'.format(message, self.config['token']))
+                '{}\ntoken: {}'.format(message, self.get_token()))
 
     def send_screenshots(self, filenames):
         if self.is_valid(self.config):
@@ -87,7 +93,7 @@ class Notifier():
                 self.config['api_token'],
                 self.config['to'],
                 subject,
-                "token: {}".format(self.config['token']),
+                "token: {}".format(self.get_token()),
                 filenames)
 
 

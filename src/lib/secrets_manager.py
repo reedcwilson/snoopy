@@ -40,3 +40,9 @@ class SecretsManager():
     def put(self, secrets):
         with open(self.filename, 'wb') as f:
             f.write(self.crypt.encrypt(secrets))
+
+    def encrypt(self, secret):
+        return self.crypt.encrypt(secret)
+
+    def decrypt(self, secret):
+        return self.crypt.decrypt(secret)

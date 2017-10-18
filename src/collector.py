@@ -13,6 +13,7 @@ from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
 from lib.file_finder import get_embedded_filename
+from lib.secrets_manager import Crypt
 
 try:
     import argparse
@@ -130,8 +131,15 @@ def log(subject, message, directory, device):
         f.write('==============================\n\n\n')
 
 
+# TODO: putting this here for now -- you should probably make the collector
+# into a class and store the crypt as a field
+crypt = Crypt(flags.token)
+
+
 def check_token(body):
-    return flags.token in body
+    # assuming that the token is always appended to the body
+    token = body[body.index('\ntoken:') + 8:]
+    return flags.token in crypt.decrypt(token)
 
 
 def download_attachments(service, user_id, msg_id, store_dir):
