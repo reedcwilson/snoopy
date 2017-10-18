@@ -5,18 +5,6 @@ import zerorpc
 import traceback
 import logging
 
-known_errors = [
-    "An attempt was made to reference a token that does not exist"
-]
-
-
-def known_error(e):
-    message = str(e)
-    for err in known_errors:
-        if err in message:
-            return True
-    return False
-
 
 class GracefulKiller:
     def __init__(self, daemon, port):
@@ -34,10 +22,9 @@ class GracefulKiller:
             message = "An unexpected error occurred: {}".format(
                 traceback.format_exc())
             logging.error(message)
-            if not known_error(e):
-                self.notifier.send(
-                    subject="Alert!",
-                    message=message)
+            self.notifier.send(
+                subject="Alert!",
+                message=message)
         self.exit()
 
     def exit(self):
