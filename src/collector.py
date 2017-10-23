@@ -150,7 +150,7 @@ def download_attachments(service, user_id, msg_id, store_dir):
         body = get_body(message)
         subject = get_header(message, 'Subject')
         device, remainder = get_path_parts(subject)
-        if not check_token(body):
+        if 'phone' not in device.lower() and not check_token(body):
             msg = 'ALERT! NO INSTALLATION TOKEN.\n'
             msg += 'body: {}'
             body = msg.format(body)
