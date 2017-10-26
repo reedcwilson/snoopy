@@ -139,6 +139,8 @@ crypt = Crypt(flags.token)
 def check_token(body):
     # assuming that the token is always appended to the body
     token = body[body.index('\ntoken:') + 8:]
+    token = token[2:len(token) - 1]
+    token = base64.b64decode(token.encode())
     return flags.token in crypt.decrypt(token)
 
 

@@ -1,5 +1,6 @@
 import logging
 import requests
+import base64
 from os.path import basename
 from datetime import datetime
 
@@ -69,7 +70,7 @@ class Notifier():
         token = self.config['token']
         now = str(datetime.now())
         blob = self.secrets_manager.encrypt('{} - {}'.format(token, now))
-        return blob
+        return base64.b64encode(blob)
 
     def send(self, subject, message=""):
         if self.is_valid(self.config):
