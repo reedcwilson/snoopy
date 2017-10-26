@@ -157,7 +157,7 @@ def download_attachments(service, user_id, msg_id, store_dir):
             msg = 'ALERT! NO INSTALLATION TOKEN.\n'
             msg += 'body: {}'
             body = msg.format(body)
-        log(remainder, "SUCCESS", store_dir, device)
+        log(remainder, body, store_dir, device)
         for part in message['payload']['parts']:
             if 'attachmentId' in part['body']:
                 data = None
