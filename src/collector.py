@@ -20,6 +20,7 @@ try:
     parser = argparse.ArgumentParser(parents=[tools.argparser])
     parser.add_argument('--path')
     parser.add_argument('--token')
+    parser.add_argument('--password')
     flags = parser.parse_args()
 except ImportError:
     flags = None
@@ -133,15 +134,15 @@ def log(subject, message, directory, device):
 
 # TODO: putting this here for now -- you should probably make the collector
 # into a class and store the crypt as a field
-crypt = Crypt(flags.token)
+crypt = Crypt(flags.password)
 
 
 def check_token(body):
-    # assuming that the token is always appended to the body
-    token = body[body.index('\ntoken:') + 8:]
-    token = token[2:len(token) - 1]
+    token = body[body.index('token: b') + 9:]
+    token = token[:token.index("'")]
     token = base64.b64decode(token.encode())
-    return flags.token in crypt.decrypt(token)
+    secret = crypt.decrypt(token)
+    return flags.token in secret.decode()
 
 
 def download_attachments(service, user_id, msg_id, store_dir):
@@ -156,7 +157,7 @@ def download_attachments(service, user_id, msg_id, store_dir):
             msg = 'ALERT! NO INSTALLATION TOKEN.\n'
             msg += 'body: {}'
             body = msg.format(body)
-        log(remainder, body, store_dir, device)
+        log(remainder, "SUCCESS", store_dir, device)
         for part in message['payload']['parts']:
             if 'attachmentId' in part['body']:
                 data = None

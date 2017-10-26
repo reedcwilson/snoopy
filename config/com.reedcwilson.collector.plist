@@ -11,6 +11,8 @@
     <string>%INSTALL_DIR%/images</string>
     <string>--token</string>
     <string>%TOKEN%</string>
+    <string>--password</string>
+    <string>%PASSWORD%</string>
   </array>
 	<key>RunAtLoad</key>
 	<true/>
