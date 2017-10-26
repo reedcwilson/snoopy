@@ -76,6 +76,9 @@ class Daemon():
                 try:
                     # catchers needs to conform to the same interface
                     names = self.catcher.capture(self.screenshots_directory)
+                    if len(names) == 0:
+                        self.sleep()
+                        continue
                 except Exception:
                     self.notifier.send(
                         'Alert!',
