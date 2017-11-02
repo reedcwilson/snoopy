@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import time
 import Quartz
 from lib.file_finder import get_embedded_filename
 from lib.daemon import Daemon
@@ -33,6 +34,8 @@ def get_plist_filename(s=None):
 
 class MyDaemon(Daemon):
     def __init__(self):
+        self.start_time = time.time()
+        self.max_life = 86400  # 24 hours in seconds
         Daemon.__init__(
             self,
             get_embedded_filename(mail_config),
@@ -41,7 +44,12 @@ class MyDaemon(Daemon):
             directory,
             catcher)
 
+    def too_old(self):
+        return (time.time() - self.start_time) > self.max_life
+
     def should_execute(self):
+        if self.too_old():
+            self.killer.quit(notify=False)
         d = Quartz.CGSessionCopyCurrentDictionary()
         return (
             d and
@@ -50,7 +58,7 @@ class MyDaemon(Daemon):
 
     def setup(self):
         # the graceful killer registers events on init
-        GracefulKiller(
+        self.killer = GracefulKiller(
             get_embedded_filename(reloader_name),
             self.notifier,
             get_critical_files())

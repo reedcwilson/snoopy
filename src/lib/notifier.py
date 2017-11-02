@@ -1,6 +1,7 @@
 import logging
 import requests
 import base64
+from os import getenv
 from os.path import basename
 from datetime import datetime
 
@@ -15,6 +16,8 @@ values in the config"""
 
 
 def send_mailgun_message(domain, api_token, to, subject, body, attachments=[]):
+    if getenv('EMAIL') == 'False':
+        return
     files = []
     for name in attachments:
         with open(name, 'rb') as f:

@@ -9,9 +9,9 @@ import subprocess
 
 class GracefulKiller:
     def __init__(self, reloader_filename, notifier, critical_files):
-        signal.signal(signal.SIGHUP, self.exit)
-        signal.signal(signal.SIGINT, self.exit)
-        signal.signal(signal.SIGTERM, self.exit)
+        signal.signal(signal.SIGHUP, self.exit_handler)
+        signal.signal(signal.SIGINT, self.exit_handler)
+        signal.signal(signal.SIGTERM, self.exit_handler)
         self.critical_files = critical_files
         self.reloader = reloader_filename
         self.notifier = notifier
@@ -22,8 +22,12 @@ class GracefulKiller:
                 return False
         return True
 
-    def exit(self, signum, frame):
-        self.notifier.send(subject="Shutting down")
+    def exit_handler(self, signum, frame):
+        quit()
+
+    def quit(self, notify=True):
+        if notify:
+            self.notifier.send(subject="Shutting down")
         pid = os.fork()
         if pid == 0:
             subprocess.call([self.reloader])

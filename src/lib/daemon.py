@@ -8,6 +8,7 @@ import os
 from os.path import join, basename
 import uuid
 import traceback
+import gc
 from watchdog.observers import Observer
 from .install_alert import InstallationEventHandler
 from .secrets_manager import SecretsManager
@@ -58,12 +59,18 @@ class Daemon():
         return len(os.listdir(self.images_dir)) > self.max_images
 
     def send(self):
-        filenames = [join(self.images_dir, n) for n in os.listdir(self.images_dir)]
+        filenames = [
+            join(self.images_dir, n)
+            for n
+            in os.listdir(self.images_dir)
+        ]
         self.notifier.send_screenshots(filenames)
         for filename in filenames:
             os.remove(filename)
 
     def sleep(self):
+        # TODO: see if this fixes the memory leak
+        gc.collect()
         self.sleep_seconds = random.randint(120, 1080)  # 2-18 min
         time.sleep(self.sleep_seconds)
 
