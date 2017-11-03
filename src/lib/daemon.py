@@ -64,6 +64,8 @@ class Daemon():
             for n
             in os.listdir(self.images_dir)
         ]
+        if len(filenames) == 0:
+            return
         try:
             self.notifier.send_screenshots(filenames)
         except:
@@ -78,8 +80,7 @@ class Daemon():
             os.remove(filename)
 
     def sleep(self):
-        # TODO: see if this fixes the memory leak
-        gc.collect()
+        gc.collect()  # attempt to keep memory low
         self.sleep_seconds = random.randint(120, 1080)  # 2-18 min
         time.sleep(self.sleep_seconds)
 
