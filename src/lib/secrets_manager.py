@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 from Crypto.Cipher import AES
+import getpass
+import os
+import base64
 import struct
 
 
@@ -46,3 +49,18 @@ class SecretsManager():
 
     def decrypt(self, secret):
         return self.crypt.decrypt(secret)
+
+
+if __name__ == '__main__':
+    password = getpass.getpass("what is the password: ")
+    crypt = Crypt(password)
+    kind = input('would you like to "e"ncrypt or ["d"ecrypt]: ')
+    text = input("what is the text: ")
+    value = None
+    if kind.lower() == 'e':
+        value = crypt.encrypt(text)
+        value = base64.b64encode(value).decode()
+    else:
+        text = base64.b64decode(text.encode())
+        value = crypt.decrypt(text).decode()
+    os.system('echo "{}\c" | pbcopy'.format(value))
