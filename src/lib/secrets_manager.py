@@ -83,6 +83,6 @@ def encrypt_config(password):
 
 if __name__ == '__main__':
     password = getpass.getpass("what is the password: ")
-    # helper(password)
-    decrypt_config(password)
+    helper(password)
+    # decrypt_config(password)
     # encrypt_config(password)
