@@ -8,7 +8,7 @@ added_files = [
 ]
 
 a = Analysis(['collector.py'],
-             pathex=['/Users/rwilson/code/snoopy/src'],
+             pathex=['/Users/reedcwilson/code/snoopy/src'],
              binaries=[],
              datas=added_files,
              hiddenimports=[],

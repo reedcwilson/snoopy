@@ -210,6 +210,8 @@ def get_label_id(service, user_id, label_name):
 
 
 def delete_message(service, user_id, msg_id):
+    if os.getenv('TEST') == 'True':
+        return
     try:
         service.users().messages().delete(userId=user_id, id=msg_id).execute()
     except errors.HttpError as error:
