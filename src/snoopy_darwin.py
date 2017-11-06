@@ -10,11 +10,13 @@ from darwin.killer import GracefulKiller
 from darwin import capture as catcher
 
 home              = os.getenv("HOME")
-directory         = 'HOME_DIRECTORY'
+# directory         = 'HOME_DIRECTORY'
+directory         = '/Users/rwilson/code/snoopy'
 config_dir        = '{}/config'.format(directory)
 installation_path = '{}/dist'.format(directory)
 launchd_path      = '/Library/LaunchAgents'
-secret_key        = 'SUPER_SECRET_KEY'
+# secret_key        = 'SUPER_SECRET_KEY'
+secret_key        = 'cHdk'
 mail_config       = 'mail.config'
 reloader_name     = 'a.out'
 

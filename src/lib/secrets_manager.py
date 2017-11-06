@@ -51,16 +51,38 @@ class SecretsManager():
         return self.crypt.decrypt(secret)
 
 
-if __name__ == '__main__':
-    password = getpass.getpass("what is the password: ")
+def helper(password):
     crypt = Crypt(password)
     kind = input('would you like to "e"ncrypt or ["d"ecrypt]: ')
-    text = input("what is the text: ")
     value = None
     if kind.lower() == 'e':
-        value = crypt.encrypt(text)
+        secret = getpass.getpass("what is the secret: ")
+        value = crypt.encrypt(secret)
         value = base64.b64encode(value).decode()
     else:
-        text = base64.b64decode(text.encode())
+        blob = input("what is the ciphertext: ")
+        text = base64.b64decode(blob.encode())
         value = crypt.decrypt(text).decode()
     os.system('echo "{}\c" | pbcopy'.format(value))
+
+
+def decrypt_config(password):
+    filename = input("what is the filename: ")
+    mgr = SecretsManager(password, filename)
+    print(mgr.get())
+
+
+def encrypt_config(password):
+    filename = input("what is the filename: ")
+    mgr = SecretsManager(password, filename)
+    text = '''
+    put text here
+    '''
+    print(mgr.put(text))
+
+
+if __name__ == '__main__':
+    password = getpass.getpass("what is the password: ")
+    # helper(password)
+    decrypt_config(password)
+    # encrypt_config(password)

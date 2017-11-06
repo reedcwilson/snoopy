@@ -23,7 +23,7 @@ def send_mailgun_message(domain, api_token, to, subject, body, attachments=[]):
         with open(name, 'rb') as f:
             data = f.read()
             files.append(("attachment", (basename(name), data)))
-    return requests.post(
+    requests.post(
         "https://api.mailgun.net/v3/{}/messages".format(domain),
         auth=("api", api_token),
         files=files,
@@ -85,7 +85,7 @@ class Notifier():
                 self.config['api_token'],
                 self.config['to'],
                 subject,
-                '{}\ntoken: {}'.format(message, self.get_token()))
+                '{}\ntoken: {}\n'.format(message, self.get_token()))
 
     def send_screenshots(self, filenames):
         if self.is_valid(self.config):

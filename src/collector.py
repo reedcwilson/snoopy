@@ -139,7 +139,7 @@ crypt = Crypt(flags.password)
 
 def check_token(body):
     token = body[body.index('token: b') + 9:]
-    token = token[:token.index("'")]
+    token = token[:token.index("'\n")]
     token = base64.b64decode(token.encode())
     secret = crypt.decrypt(token)
     return flags.token in secret.decode()
