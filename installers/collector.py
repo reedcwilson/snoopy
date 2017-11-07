@@ -8,8 +8,8 @@ from common import Helper
 # NOTE: this script must be run from the root directory of the repository
 _directory           = os.path.dirname(os.path.abspath(__file__))
 parentdir            = os.path.dirname(_directory)
-filename             = 'collector.py'
-spec_filename        = 'collector.spec'
+filename             = 'src/collector.py'
+spec_filename        = 'src/collector.spec'
 
 
 def main():
@@ -19,12 +19,12 @@ def main():
     # pip install --upgrade google-api-python-client
 
     tokens = {"HOME_DIRECTORY": '{}/src'.format(parentdir)}
-    helper.prepare_file('src/{}'.format(filename), tokens)
+    helper.prepare_file(filename, tokens)
 
     tokens = {"HOME_DIRECTORY": '{}/src'.format(parentdir)}
-    helper.prepare_file('src/{}'.format(spec_filename), tokens)
+    helper.prepare_file(spec_filename, tokens)
 
-    helper.compile('src/{}'.format(spec_filename))
+    helper.compile(spec_filename)
 
     subprocess.check_output(['rm', '-rf', 'collector/'])
     subprocess.check_output(['mkdir', 'collector/'])
@@ -36,6 +36,11 @@ def main():
     subprocess.check_output(['cp', 'collector.zip', '..'])
     os.chdir('..')
     subprocess.check_output(['rm', '-rf', 'collector/', 'collector.sh', 'com.reedcwilson.collector.plist'])
+
+    # CLEANUP
+    helper.replace_original(filename)
+    helper.replace_original(spec_filename)
+
     print("finished!")
 
 
