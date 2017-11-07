@@ -6,6 +6,7 @@ import zipfile
 import httplib2
 import shutil
 import datetime
+from uuid import uuid4
 
 from apiclient import discovery
 from apiclient import errors
@@ -97,7 +98,11 @@ def unzip_files(zip_name, directory, subject):
                 if filename.endswith('.png'):
                     part = zip_ref.read(filename)
                     dev, name = get_path_parts(subject)
-                    png = '{}/{}/{} - {}.png'.format(directory, dev, name, i)
+                    png = '{}/{}/{} - {}.png'.format(
+                        directory,
+                        dev,
+                        name,
+                        str(uuid4())[0:8])
                     ensure_directory(png)
                     with open(png, 'wb') as f:
                         f.write(part)
@@ -108,10 +113,21 @@ def unzip_files(zip_name, directory, subject):
     return num
 
 
+def get_plain_part(message):
+    for part in message['payload']['parts']:
+        if part['mimeType'] == 'text/plain':
+            return part
+        if 'parts' in part:
+            for inner in part['parts']:
+                if inner['mimeType'] == 'text/plain':
+                    return inner
+    return None
+
+
 def get_body(message):
-    plain_part = list(filter(
-        lambda p: p['mimeType'] == 'text/plain',
-        message['payload']['parts']))[0]
+    if 'body' in message['payload'] and 'data' in message['payload']['body']:
+        return base64.b64decode(message['payload']['body']['data']).decode()
+    plain_part = get_plain_part(message)
     return base64.b64decode(plain_part['body']['data']).decode()
 
 
@@ -139,7 +155,7 @@ crypt = Crypt(flags.password)
 
 def check_token(body):
     token = body[body.index('token: b') + 9:]
-    token = token[:token.index("'\n")]
+    token = token[:token.index("'")]
     token = base64.b64decode(token.encode())
     secret = crypt.decrypt(token)
     return flags.token in secret.decode()
@@ -171,7 +187,7 @@ def download_attachments(service, user_id, msg_id, store_dir):
                         id=att_id).execute()
                     data = att['data']
                 file_data = base64.urlsafe_b64decode(data.encode('UTF-8'))
-                path = '/'.join([store_dir, 'a.zip'])
+                path = '/'.join([store_dir, part['filename']])
                 with open(path, 'wb') as f:
                     f.write(file_data)
                     num += unzip_files(path, store_dir, subject)
