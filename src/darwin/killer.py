@@ -23,7 +23,7 @@ class GracefulKiller:
         return True
 
     def exit_handler(self, signum, frame):
-        quit()
+        self.quit()
 
     def quit(self, notify=True):
         if notify:
