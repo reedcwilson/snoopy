@@ -154,11 +154,14 @@ crypt = Crypt(flags.password)
 
 
 def check_token(body):
-    token = body[body.index('token: b') + 9:]
-    token = token[:token.index("'")]
-    token = base64.b64decode(token.encode())
-    secret = crypt.decrypt(token)
-    return flags.token in secret.decode()
+    try:
+        token = body[body.index('token: b') + 9:]
+        token = token[:token.index("'")]
+        token = base64.b64decode(token.encode())
+        secret = crypt.decrypt(token)
+        return flags.token in secret.decode()
+    except:
+        return False
 
 
 def download_attachments(service, user_id, msg_id, store_dir):
