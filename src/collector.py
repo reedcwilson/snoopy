@@ -84,10 +84,10 @@ def fix_bad_zip_file(zipFile):
 
 def open_zip(zip_name):
     try:
-        return zipfile.ZipFile(zip_name, 'r')
+        return zipfile.ZipFile(zip_name, 'r', zipfile.ZIP_DEFLATED)
     except zipfile.BadZipFile:
         fix_bad_zip_file(zip_name)
-        return zipfile.ZipFile(zip_name, 'r')
+        return zipfile.ZipFile(zip_name, 'r', zipfile.ZIP_DEFLATED)
 
 
 def unzip_files(zip_name, directory, subject):
@@ -107,8 +107,8 @@ def unzip_files(zip_name, directory, subject):
                     with open(png, 'wb') as f:
                         f.write(part)
                         num += 1
-    except zipfile.BadZipFile:
-        pass
+    except zipfile.BadZipFile as e:
+        print('failed to unzip: {}', str(e))
     os.remove(zip_name)
     return num
 
@@ -128,7 +128,11 @@ def get_body(message):
     if 'body' in message['payload'] and 'data' in message['payload']['body']:
         return base64.b64decode(message['payload']['body']['data']).decode()
     plain_part = get_plain_part(message)
-    return base64.b64decode(plain_part['body']['data']).decode()
+    try:
+        return base64.b64decode(plain_part['body']['data']).decode()
+    except:
+        return '** failed to decode body **\n\n{}'.format(
+            plain_part['body']['data'])
 
 
 def get_header(message, key):
@@ -193,7 +197,7 @@ def download_attachments(service, user_id, msg_id, store_dir):
                 path = '/'.join([store_dir, part['filename']])
                 with open(path, 'wb') as f:
                     f.write(file_data)
-                    num += unzip_files(path, store_dir, subject)
+                num += unzip_files(path, store_dir, subject)
     except errors.HttpError as error:
         print('An error occurred: {}'.format(error))
     return num
