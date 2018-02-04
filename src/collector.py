@@ -181,25 +181,30 @@ def download_attachments(service, user_id, msg_id, store_dir):
             msg += 'body: {}'
             body = msg.format(body)
         log(remainder, body, store_dir, device)
-        for part in message['payload']['parts']:
-            if 'attachmentId' in part['body']:
-                data = None
-                if 'data' in part['body']:
-                    data = part['body']['data']
-                else:
-                    att_id = part['body']['attachmentId']
-                    att = service.users().messages().attachments().get(
-                        userId=user_id,
-                        messageId=msg_id,
-                        id=att_id).execute()
-                    data = att['data']
-                file_data = base64.urlsafe_b64decode(data.encode('UTF-8'))
-                path = '/'.join([store_dir, part['filename']])
-                with open(path, 'wb') as f:
-                    f.write(file_data)
-                num += unzip_files(path, store_dir, subject)
-    except errors.HttpError as error:
-        print('An error occurred: {}'.format(error))
+        try:
+            for part in message['payload']['parts']:
+                if 'attachmentId' in part['body']:
+                    data = None
+                    if 'data' in part['body']:
+                        data = part['body']['data']
+                    else:
+                        att_id = part['body']['attachmentId']
+                        att = service.users().messages().attachments().get(
+                            userId=user_id,
+                            messageId=msg_id,
+                            id=att_id).execute()
+                        data = att['data']
+                    file_data = base64.urlsafe_b64decode(data.encode('UTF-8'))
+                    path = '/'.join([store_dir, part['filename']])
+                    with open(path, 'wb') as f:
+                        f.write(file_data)
+                    num += unzip_files(path, store_dir, subject)
+        except Exception as e:
+            print('Message is not formatted as expected: {}'.format(subject))
+    except errors.HttpError as e:
+        print('An error occurred downloading the attachment: {}'.format(e))
+    except Exception as e:
+        print('An unknown error occurred: {}'.format(e))
     return num
 
 
