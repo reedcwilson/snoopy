@@ -81,7 +81,7 @@ class Daemon():
 
     def sleep(self):
         gc.collect()  # attempt to keep memory low
-        self.sleep_seconds = random.randint(120, 1080)  # 2-18 min
+        self.sleep_seconds = random.randint(120, 2160)  # 2-36 min
         time.sleep(self.sleep_seconds)
 
     def run(self):
