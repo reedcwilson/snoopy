@@ -20,4 +20,5 @@ client_secret.json
 screens.zip
 collector.zip
 captured_images/
+last_email_sent
 .vscode*

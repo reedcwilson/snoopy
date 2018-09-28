@@ -2,7 +2,7 @@ import logging
 import requests
 import base64
 from os import getenv
-from os.path import basename
+from os.path import basename, join
 from datetime import datetime
 
 
@@ -35,9 +35,11 @@ def send_mailgun_message(domain, api_token, to, subject, body, attachments=[]):
 
 
 class Notifier():
-    def __init__(self, secrets_manager):
+    def __init__(self, secrets_manager, storage_directory):
         self.secrets_manager = secrets_manager
         self.config = self.get_config()
+        self.storage_directory = storage_directory
+        self._update_last_email()
 
     def extract_value(self, string):
         return string.split(":")[1].strip()
@@ -86,6 +88,7 @@ class Notifier():
                 self.config['to'],
                 subject,
                 '{}\ntoken: {}\n'.format(message, self.get_token()))
+            self._update_last_email()
 
     def send_screenshots(self, filenames):
         if self.is_valid(self.config):
@@ -99,6 +102,20 @@ class Notifier():
                 subject,
                 "token: {}".format(self.get_token()),
                 filenames)
+            self._update_last_email()
+
+    def _update_last_email(self):
+        with open(join(self.storage_directory, 'last_email_sent'), 'w') as f:
+            f.write(str(datetime.now()))
+
+    def get_last_email(self):
+        with open(join(self.storage_directory, 'last_email_sent'), 'r') as f:
+            return datetime.strptime(f.read(), '%Y-%m-%d %H:%M:%S.%f')
+
+    def ping(self):
+        now = datetime.now()
+        if (now - self.get_last_email()).days >= 7:
+            self.send(subject='Ping', message=str(now))
 
 
 if __name__ == '__main__':

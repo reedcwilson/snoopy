@@ -29,7 +29,7 @@ class Daemon():
         config_filename = mail_config
         secret_key_raw = base64.b64decode(secret_key).decode()
         mail_secrets_manager = SecretsManager(secret_key_raw, config_filename)
-        self.notifier = Notifier(mail_secrets_manager)
+        self.notifier = Notifier(mail_secrets_manager, screenshots_directory)
         installation_event_handler = InstallationEventHandler(self.notifier)
         self.observer = Observer()
         self.observer.schedule(
@@ -108,3 +108,5 @@ class Daemon():
                 should_send = self.store_images(names)
                 if should_send or random.random() < self.likelihood:
                     self.send()
+            # send a ping email if we haven't sent an email in a while
+            self.notifier.ping()
