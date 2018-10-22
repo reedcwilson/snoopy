@@ -59,7 +59,7 @@ class ConfigHelper:
             inputs['recipient'] = input("recipient of emails: ")
             inputs['domain'] = input("mailgun domain: ")
             inputs['api_token'] = getpass.getpass("mailgun api token: ")
-            inputs['token'] = getpass.getpass("secure token: ")
+            inputs['token'] = getpass.getpass("secret phrase: ")
 
         # create config
         config_str = ""
@@ -67,7 +67,7 @@ class ConfigHelper:
             config_str += "{}:{}\n".format(key, value)
 
         # accept the secret encryption key
-        self.secret_key = getpass.getpass("secret (should not equal token): ")
+        self.secret_key = getpass.getpass("password (should not equal token): ")
 
         print("preparing files...")
 
