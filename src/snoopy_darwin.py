@@ -6,6 +6,7 @@ import Quartz
 from lib.file_finder import get_embedded_filename
 from lib.daemon import Daemon
 from lib.config_event_handler import ConfigFileEventHandler
+from lib.file_cleaner import FileCleaner
 from darwin.killer import GracefulKiller
 from darwin import capture as catcher
 
@@ -36,6 +37,7 @@ class MyDaemon(Daemon):
     def __init__(self):
         self.start_time = time.time()
         self.max_life = 86400  # 24 hours in seconds
+        self.last_run = 0
         Daemon.__init__(
             self,
             get_embedded_filename(mail_config),
@@ -43,6 +45,7 @@ class MyDaemon(Daemon):
             installation_path,
             directory,
             catcher)
+        self.file_cleaner = FileCleaner('/etc/hosts', get_notifier())
 
     def too_old(self):
         return (time.time() - self.start_time) > self.max_life
@@ -55,6 +58,10 @@ class MyDaemon(Daemon):
             d and
             d.get("CGSSessionScreenIsLocked", 0) == 0 and
             d.get("kCGSSessionOnConsoleKey", 0) == 1)
+
+    def execute(self):
+        file_cleaner.clean('api.mailgun.net', self.last_run)
+        self.last_run = datetime.today()
 
     def setup(self):
         # the graceful killer registers events on init

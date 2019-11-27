@@ -44,6 +44,13 @@ class Daemon():
     def should_execute(self):
         return True
 
+    def execute(self):
+        ''' 
+        method to be overriden by derived classes for platform specific
+        executions
+        '''
+        pass
+
     def get_notifier(self):
         return self.notifier
 
@@ -91,6 +98,7 @@ class Daemon():
             # if we sleep at the beginning, then multiple restarts won't
             # attempt to send tons of emails
             self.sleep()
+            self.execute()
             if self.should_execute():
                 names = []
                 try:
